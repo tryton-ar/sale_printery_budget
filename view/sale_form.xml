@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<!-- This file is part of Tryton.  The COPYRIGHT file at the top level of
+this repository contains the full copyright notices and license terms. -->
+<data>
+    <xpath expr="/form/field[@name='reference']" position="after">
+        <label name="cantidad" />
+        <field name="cantidad" />
+        <label name="cantidad_confirmada" />
+        <field name="cantidad_confirmada" />
+        <!-- widget="selection" view_ids="sale_printery_budget.cantidad_view_tree_selection" /> -->
+        <label name="write_uid" />
+        <field name="write_uid" />
+        <newline />
+        <group col="7" colspan="2" id="button_papel">
+            <button name="calcular_papel" string="Asistente de Presupuesto"/>
+            <button name="retomar_calcular_papel" string="Retomar Asistente"/>
+        </group>
+    </xpath>
+    <xpath expr="/form/notebook" position="inside">
+        <page string="Otras Cantidades" id="otra_cantidad"
+            states="{'invisible': ~Eval('state').in_(['draft', 'quotation'])}" >
+            <field name="otra_cantidad"/>
+        </page>
+        <page string="Ordenes de Trabajo" id="orden_trabajo" >
+            <field name="orden_trabajo"/>
+        </page>
+    </xpath>
+</data>

@@ -1,0 +1,124 @@
+<?xml version="1.0"?>
+<!-- This file is part of Tryton.  The COPYRIGHT file at the top level of
+this repository contains the full copyright notices and license terms. -->
+<form string="Ordenes de Trabajo" col="6">
+    <label name="cantidad_confirmada"/>
+    <field name="cantidad_confirmada"/>
+    <notebook colspan="6">
+        <page string="Orden" id="orden">
+            <group col="2" colspan="2" id="states">
+                <label name="state"/>
+                <field name="state"/>
+            </group>
+            <group col="2" colspan="2" id="amount_buttons">
+                <group col="7" colspan="2" id="buttons">
+                    <button name="confirmed" string="Confirmed"
+                        icon="tryton-go-next"/>
+                    <button name="cancel" string="Cancel"
+                        icon="tryton-cancel"/>
+                    <button name="process" string="Procesar"
+                        icon="tryton-go-next"/>
+                    <button name="done" string="Terminar"
+                        icon="tryton-go-next"/>
+                </group>
+            </group>
+        </page>
+        <page string="Producto" id="wizard_producto">
+            <label name="id_interior" />
+            <field name="id_interior" />
+            <label name="cantidad" />
+            <field name="cantidad" />
+            <newline />
+            <label name="categoria" />
+            <field name="categoria" />
+            <newline />
+            <label name="ancho" />
+            <field name="ancho" />
+            <label name="altura" />
+            <field name="altura" />
+            <newline />
+            <label name="es_tapa" />
+            <field name="es_tapa" />
+            <label name="cantidad_paginas" />
+            <field name="cantidad_paginas" />
+            <label name="solapa" />
+            <field name="solapa" />
+            <label name="lomo" />
+            <field name="lomo" />
+            <label name="tipo_papel" />
+            <field name="tipo_papel" />
+            <label name="gramaje" />
+            <field name="gramaje" />
+            <label name="colores_frente" />
+            <field name="colores_frente" />
+            <label name="colores_dorso" />
+            <field name="colores_dorso" />
+            <label name="tinta" />
+            <field name="tinta" />
+            <label name="cantidad_tinta" />
+            <field name="cantidad_tinta" />
+            <label name="tinta_superficie_cubierta" />
+            <field name="tinta_superficie_cubierta" />
+            <newline />
+            <separator name="term_superficial" string="Terminacion Superficial" colspan="6"/>
+            <newline />
+            <label name="doblado" />
+            <field name="doblado" />
+            <newline />
+            <label name="encuadernado" />
+            <field name="encuadernado" />
+            <label name="cantidad_broches" />
+            <field name="cantidad_broches" />
+            <newline />
+            <label name="laminado" />
+            <field name="laminado" />
+            <label name="laminado_orientacion" />
+            <field name="laminado_orientacion" />
+        </page>
+        <page string="Presupuesto" id="wizard_presupuesto">
+            <label name="maquina" />
+            <field name="maquina"
+                view_ids="sale_printery_budget.template_view_tree_maquina" />
+            <label name="velocidad_maquina" />
+            <field name="velocidad_maquina" />
+            <newline />
+            <label name="calle_horizontal" />
+            <field name="calle_horizontal" />
+            <label name="calle_vertical" />
+            <field name="calle_vertical" />
+            <label name="sin_pinza" />
+            <field name="sin_pinza" />
+            <newline />
+            <label name="producto_papel" />
+            <field name="producto_papel" />
+            <newline />
+            <label name="formato_pliego" />
+            <field name="formato_pliego" />
+            <label name="trabajos_por_pliego" />
+            <field name="trabajos_por_pliego" />
+            <label name="pliegos_netos" />
+            <field name="pliegos_netos" />
+            <label name="pliegos_demasia_fija" />
+            <field name="pliegos_demasia_fija" />
+            <label name="pliegos_demasia_variable" />
+            <field name="pliegos_demasia_variable" />
+            <label name="cantidad_hojas" />
+            <field name="cantidad_hojas" />
+            <label name="desperdicio" />
+            <field name="desperdicio" />
+            <label name="cantidad_planchas" />
+            <field name="cantidad_planchas" />
+            <label name="postura_trabajo" />
+            <field name="postura_trabajo" />
+            <label name="postura_papel" />
+            <field name="postura_papel" />
+            <label name="tiempo_arranque" />
+            <field name="tiempo_arranque" />
+            <label name="tiempo_impresion" />
+            <field name="tiempo_impresion" />
+        </page>
+        <page string="Observaciones" id="observaciones">
+            <field name="observaciones"/>
+        </page>
+    </notebook>
+</form>

@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<!-- This file is part of the sale_printery_budget module for Tryton.
+The COPYRIGHT file at the top level of this repository contains
+the full copyright notices and license terms. -->
+<tryton>
+    <data>
+        <record model="ir.ui.view" id="trabajo_view_form">
+            <field name="model">sale_printery_budget.orden_trabajo</field>
+            <field name="type">form</field>
+            <field name="name">trabajo_form</field>
+        </record>
+        <record model="ir.ui.view" id="trabajo_view_tree">
+            <field name="model">sale_printery_budget.orden_trabajo</field>
+            <field name="type">tree</field>
+            <field name="name">trabajo_tree</field>
+        </record>
+
+        <record model="ir.action.act_window" id="act_trabajo_form">
+            <field name="name">Ordenes de Trabajo</field>
+            <field name="res_model">sale_printery_budget.orden_trabajo</field>
+            <field name="search_value"></field>
+        </record>
+        <record model="ir.action.act_window.domain" id="act_trabajo_form_domain_all">
+            <field name="name">Ordenes de Trabajo</field>
+            <field name="sequence" eval="10"/>
+            <field name="domain">[('state', '!=', 'draft')]</field>
+            <field name="act_window" ref="act_trabajo_form"/>
+        </record>
+
+        <menuitem name="Ordenes de Trabajo" sequence="0" id="menu_trabajo" />
+        <menuitem id="menu_sale_printery_budget_trabajo" parent="menu_trabajo" action="act_trabajo_form" icon="tryton-list"/>
+    </data>
+</tryton>

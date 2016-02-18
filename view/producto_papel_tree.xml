@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<!-- This file is part of sale_printery_budget.  The COPYRIGHT file at the top level of
+this repository contains the full copyright notices and license terms. -->
+<tree string="Productos Papel">
+    <field name="desperdicio"/>
+    <field name="orientacion_papel"/>
+    <field name="orientacion_trabajo"/>
+    <field name="trabajos_por_pliego"/>
+    <field name="name"/>
+    <field name="alto_pliego"/>
+    <field name="ancho_pliego"/>
+    <field name="cantidad_hojas"/>
+    <field name="cantidad_de_pliegos"/>
+</tree>

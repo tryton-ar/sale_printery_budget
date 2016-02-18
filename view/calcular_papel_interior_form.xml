@@ -1,0 +1,96 @@
+<?xml version="1.0"?>
+<!-- This file is part of the sale_printery_budget module for Tryton.
+The COPYRIGHT file at the top level of this repository contains
+the full copyright notices and license terms. -->
+<form string="Asistente de Presupuesto">
+    <notebook colspan="6">
+        <page string="Producto" id="wizard_producto">
+            <label name="id_wizard_start" />
+            <field name="id_wizard_start" />
+            <field name="cantidad" invisible="1"/>
+            <newline />
+            <label name="categoria" />
+            <field name="categoria" />
+            <label name="cantidad_paginas" />
+            <field name="cantidad_paginas" />
+            <newline />
+            <label name="ancho" />
+            <field name="ancho" />
+            <label name="altura" />
+            <field name="altura" />
+            <newline />
+            <label name="es_tapa" />
+            <field name="es_tapa" />
+            <newline />
+            <label name="solapa" />
+            <field name="solapa" />
+            <label name="lomo" />
+            <field name="lomo" />
+            <label name="tipo_papel" />
+            <field name="tipo_papel" />
+            <label name="gramaje" />
+            <field name="gramaje" />
+            <label name="colores_frente" />
+            <field name="colores_frente" />
+            <label name="colores_dorso" />
+            <field name="colores_dorso" />
+            <label name="tinta" />
+            <field name="tinta" />
+            <label name="tinta_superficie_cubierta" />
+            <field name="tinta_superficie_cubierta" />
+            <newline />
+            <separator name="term_superficial" string="Terminacion Superficial" colspan="6"/>
+            <newline />
+            <label name="doblado" />
+            <field name="doblado" />
+            <newline />
+            <label name="encuadernado" />
+            <field name="encuadernado" />
+            <label name="cantidad_broches" />
+            <field name="cantidad_broches" />
+            <newline />
+            <label name="laminado" />
+            <field name="laminado" />
+            <label name="laminado_orientacion" />
+            <field name="laminado_orientacion" />
+        </page>
+        <page string="Presupuesto" id="wizard_presupuesto">
+            <label name="maquina" />
+            <field name="maquina" />
+            <label name="velocidad_maquina" />
+            <field name="velocidad_maquina" />
+            <newline />
+            <label name="calle_horizontal" />
+            <field name="calle_horizontal" />
+            <label name="calle_vertical" />
+            <field name="calle_vertical" />
+            <label name="sin_pinza" />
+            <field name="sin_pinza" />
+            <newline />
+            <label name="producto_papel" />
+            <field name="producto_papel"
+                view_ids="sale_printery_budget.template_view_tree_wizard_papel" />
+            <newline />
+            <label name="demasia_fija" />
+            <field name="demasia_fija" />
+            <label name="demasia_variable" />
+            <field name="demasia_variable" />
+            <newline />
+            <label name="formato_pliego" />
+            <field name="formato_pliego" />
+            <label name="trabajos_por_pliego" />
+            <field name="trabajos_por_pliego" />
+            <label name="pliegos_netos" />
+            <field name="pliegos_netos" />
+            <newline />
+            <label name="cantidad_planchas" />
+            <field name="cantidad_planchas" />
+            <label name="plancha_adicional" />
+            <field name="plancha_adicional" />
+            <label name="postura_trabajo" />
+            <field name="postura_trabajo" />
+            <label name="postura_papel" />
+            <field name="postura_papel" />
+        </page>
+    </notebook>
+</form>

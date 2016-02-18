@@ -1,0 +1,88 @@
+<?xml version="1.0"?>
+<!-- This file is part of Tryton.  The COPYRIGHT file at the top level of
+this repository contains the full copyright notices and license terms. -->
+<data>
+    <xpath expr="/form/notebook/page[@id='general']/field[@name='type']" position="after">
+            <!-- states="{'invisible': Eval('type').in_(['service'])}"> -->
+            <label name="product_type_printery"/>
+            <field name="product_type_printery"/>
+            <label name="genera_contribucion_marginal"/>
+            <field name="genera_contribucion_marginal"/>
+            <newline />
+            <label name="pliegos_por_plancha"/>
+            <field name="pliegos_por_plancha"/>
+            <label name="rendimiento_tinta"/>
+            <field name="rendimiento_tinta"/>
+     </xpath>
+    <xpath expr="/form/notebook" position="inside">
+        <page string="Mediciones Maquina" col="4" id="mediciones_maquina"
+            states="{'invisible':Not(Eval('product_type_printery').in_(['maquina']))}">
+            <label name="height_max" string="Formato Maximo"/>
+            <field name="height_max"/>
+            <field name="width_max"/>
+            <field name="maquina_uom"/>
+
+            <label name="height_min" string="Formato Minimo"/>
+            <field name="height_min"/>
+            <field name="width_min"/>
+            <field name="maquina_uom"/>
+
+            <newline />
+            <label name="cambio_de_plancha"/>
+            <field name="cambio_de_plancha"/>
+            <field name="cambio_de_plancha_uom"/>
+            <newline />
+
+            <label name="preparacion"/>
+            <field name="preparacion"/>
+            <field name="preparacion_uom"/>
+            <newline />
+
+            <label name="tiempo_rapido"/>
+            <field name="tiempo_rapido"/>
+
+            <label name="tiempo_medio"/>
+            <field name="tiempo_medio"/>
+            <newline />
+
+            <label name="tiempo_lento"/>
+            <field name="tiempo_lento"/>
+            <label name="plancha"/>
+            <field name="plancha"/>
+            <newline />
+            <label name="colores"/>
+            <field name="colores"/>
+            <newline />
+            <label name="pinza"/>
+            <field name="pinza"/>
+            <field name="maquina_uom"/>
+            <newline />
+            <label name="cola"/>
+            <field name="cola"/>
+            <field name="maquina_uom"/>
+            <newline />
+            <label name="laterales"/>
+            <field name="laterales"/>
+            <field name="maquina_uom"/>
+            <newline />
+            <label name="demasia_fija"/>
+            <field name="demasia_fija"/>
+            <label name="demasia_variable"/>
+            <field name="demasia_variable"/>
+        </page>
+        <page string="Terminacion Superficial" col="4" id="terminacion_superficial"
+            states="{'invisible':Not(Eval('product_type_printery').in_(['maquina_doblado','maquina_laminado', 'maquina_encuadernacion']))}">
+            <label name="velocidad_maq"/>
+            <field name="velocidad_maq"/>
+            <newline />
+            <label name="tiempo_arreglo"/>
+            <field name="tiempo_arreglo"/>
+            <newline />
+            <label name="broche"/>
+            <field name="broche"/>
+            <newline />
+            <label name="material_laminado"/>
+            <field name="material_laminado"/>
+        </page>
+    </xpath>
+</data>
