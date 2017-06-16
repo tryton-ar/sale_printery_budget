@@ -77,8 +77,7 @@ this repository contains the full copyright notices and license terms. -->
         </page>
         <page string="Presupuesto" id="wizard_presupuesto">
             <label name="maquina" />
-            <field name="maquina"
-                view_ids="sale_printery_budget.template_view_tree_maquina" />
+            <field name="maquina" />
             <label name="velocidad_maquina" />
             <field name="velocidad_maquina" />
             <newline />
