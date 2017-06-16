@@ -2,7 +2,7 @@
 <!-- This file is part of the sale_printery_budget module for Tryton.
 The COPYRIGHT file at the top level of this repository contains
 the full copyright notices and license terms. -->
-<form string="Asistente de Presupuesto">
+<form>
     <notebook colspan="6">
         <page string="Producto" id="wizard_producto">
             <label name="id_wizard_start" />

@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <!-- This file is part of sale_printery_budget.  The COPYRIGHT file at the top level of
 this repository contains the full copyright notices and license terms. -->
-<tree string="Productos Papel">
+<tree>
     <field name="desperdicio"/>
     <field name="orientacion_papel"/>
     <field name="orientacion_trabajo"/>
