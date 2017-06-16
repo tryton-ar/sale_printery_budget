@@ -14,6 +14,8 @@ from trytond.pyson import Eval, Id, Bool, Not
 from trytond.transaction import Transaction
 from trytond.wizard import Button, StateTransition, StateView, Wizard
 from trytond.report import Report
+import logging
+logger = logging.getLogger(__name__)
 
 ORIENTACION = [
     ('', ''),
@@ -472,52 +474,52 @@ class CalcularPapelWizard(ModelView):
 
     @fields.depends('maquina', 'altura', 'ancho', 'tipo_papel', 'gramaje', 'id_wizard_start', 'cantidad', 'calle_horizontal', 'calle_vertical', 'sin_pinza', 'categoria', 'solapa', 'lomo', 'es_tapa', 'sale_id', 'cantidad_paginas')
     def on_change_categoria(self):
-        print 'on_change_categoria'
+        logger.info('on_change_categoria')
         return self._generate_producto_papel(self)
 
     @fields.depends('maquina', 'altura', 'ancho', 'tipo_papel', 'gramaje', 'id_wizard_start', 'cantidad', 'calle_horizontal', 'calle_vertical', 'sin_pinza', 'categoria', 'solapa', 'lomo', 'es_tapa', 'sale_id', 'cantidad_paginas')
     def on_change_cantidad_paginas(self):
-        print 'on_change_cantidad_paginas'
+        logger.info('on_change_cantidad_paginas')
         return self._generate_producto_papel(self)
 
     @fields.depends('maquina', 'altura', 'ancho', 'tipo_papel', 'gramaje', 'id_wizard_start', 'cantidad', 'calle_horizontal', 'calle_vertical', 'sin_pinza', 'categoria', 'solapa', 'lomo', 'es_tapa', 'sale_id', 'cantidad_paginas')
     def on_change_lomo(self):
-        print 'on_change_lomo'
+        logger.info('on_change_lomo')
         return self._generate_producto_papel(self)
 
     @fields.depends('maquina', 'altura', 'ancho', 'tipo_papel', 'gramaje', 'id_wizard_start', 'cantidad', 'calle_horizontal', 'calle_vertical', 'sin_pinza', 'categoria', 'solapa', 'lomo', 'es_tapa', 'sale_id', 'cantidad_paginas')
     def on_change_es_tapa(self):
-        print 'on_change_es_tapa'
+        logger.info('on_change_es_tapa')
         return self._generate_producto_papel(self)
 
     @fields.depends('maquina', 'altura', 'ancho', 'tipo_papel', 'gramaje', 'id_wizard_start', 'cantidad', 'calle_horizontal', 'calle_vertical', 'sin_pinza', 'categoria', 'solapa', 'lomo', 'es_tapa', 'sale_id', 'cantidad_paginas')
     def on_change_solapa(self):
-        print 'on_change_solapa'
+        logger.info('on_change_solapa')
         return self._generate_producto_papel(self)
 
     @fields.depends('maquina', 'altura', 'ancho', 'tipo_papel', 'gramaje', 'id_wizard_start', 'cantidad', 'calle_horizontal', 'calle_vertical', 'sin_pinza', 'categoria', 'solapa', 'lomo', 'es_tapa', 'sale_id', 'cantidad_paginas')
     def on_change_altura(self):
-        print 'on_change_altura'
+        logger.info('on_change_altura')
         return self._generate_producto_papel(self)
 
     @fields.depends('maquina', 'altura', 'ancho', 'tipo_papel', 'gramaje', 'id_wizard_start', 'cantidad', 'calle_horizontal', 'calle_vertical', 'sin_pinza', 'categoria', 'solapa', 'lomo', 'es_tapa', 'sale_id', 'cantidad_paginas')
     def on_change_ancho(self):
-        print 'on_change_ancho'
+        logger.info('on_change_ancho')
         return self._generate_producto_papel(self)
 
     @fields.depends('maquina', 'altura', 'ancho', 'tipo_papel', 'gramaje', 'id_wizard_start', 'cantidad', 'calle_horizontal', 'calle_vertical', 'sin_pinza', 'categoria', 'solapa', 'lomo', 'es_tapa', 'sale_id', 'cantidad_paginas')
     def on_change_tipo_papel(self):
-        print 'on_change_gramaje'
+        logger.info('on_change_gramaje')
         return self._generate_producto_papel(self)
 
     @fields.depends('maquina', 'altura', 'ancho', 'tipo_papel', 'gramaje', 'id_wizard_start', 'cantidad', 'calle_horizontal', 'calle_vertical', 'sin_pinza', 'categoria', 'solapa', 'lomo', 'es_tapa', 'sale_id', 'cantidad_paginas')
     def on_change_gramaje(self):
-        print 'on_change_gramaje'
+        logger.info('on_change_gramaje')
         return self._generate_producto_papel(self)
 
     @fields.depends('maquina', 'altura', 'ancho', 'tipo_papel', 'gramaje', 'id_wizard_start', 'cantidad', 'calle_horizontal', 'calle_vertical', 'sin_pinza', 'categoria', 'solapa', 'lomo', 'es_tapa', 'sale_id', 'cantidad_paginas')
     def on_change_maquina(self):
-        print 'on_change_maquina'
+        logger.info('on_change_maquina')
         res = self._generate_producto_papel(self)
         try:
             if self.maquina.demasia_fija:
@@ -526,33 +528,33 @@ class CalcularPapelWizard(ModelView):
             if self.maquina.demasia_variable:
                 res['demasia_variable'] = self.maquina.demasia_variable
         except:
-            print "Variable indefinida"
+            logger.info('Variable indefinida')
 
         return res
 
     @fields.depends('maquina', 'altura', 'ancho', 'tipo_papel', 'gramaje', 'id_wizard_start', 'cantidad', 'calle_horizontal', 'calle_vertical', 'sin_pinza', 'categoria', 'solapa', 'lomo', 'es_tapa', 'sale_id', 'cantidad_paginas')
     def on_change_cantidad(self):
-        print 'on_change_cantidad'
+        logger.info('on_change_cantidad')
         return self._generate_producto_papel(self)
 
     @fields.depends('maquina', 'altura', 'ancho', 'tipo_papel', 'gramaje', 'id_wizard_start', 'cantidad', 'calle_horizontal', 'calle_vertical', 'sin_pinza', 'categoria', 'solapa', 'lomo', 'es_tapa', 'sale_id', 'cantidad_paginas')
     def on_change_calle_horizontal(self):
-        print 'on_change_calle_horizontal'
+        logger.info('on_change_calle_horizontal')
         return self._generate_producto_papel(self)
 
     @fields.depends('maquina', 'altura', 'ancho', 'tipo_papel', 'gramaje', 'id_wizard_start', 'cantidad', 'calle_horizontal', 'calle_vertical', 'sin_pinza', 'categoria', 'solapa', 'lomo', 'es_tapa', 'sale_id', 'cantidad_paginas')
     def on_change_calle_vertical(self):
-        print 'on_change_calle_vertical'
+        logger.info('on_change_calle_vertical')
         return self._generate_producto_papel(self)
 
     @fields.depends('maquina', 'altura', 'ancho', 'tipo_papel', 'gramaje', 'id_wizard_start', 'cantidad', 'calle_horizontal', 'calle_vertical', 'sin_pinza', 'categoria', 'solapa', 'lomo', 'es_tapa', 'sale_id', 'cantidad_paginas')
     def on_change_sin_pinza(self):
-        print 'on_change_sin_pinza'
+        logger.info('on_change_sin_pinza')
         return self._generate_producto_papel(self)
 
     @fields.depends('producto_papel', 'colores_frente', 'colores_dorso', 'cantidad_paginas', 'categoria')
     def on_change_with_cantidad_planchas(self, name=None):
-        print "on_change_with_cantidad_planchas"
+        logger.info('on_change_with_cantidad_planchas')
         if self.producto_papel is None:
             return None
 
@@ -583,7 +585,7 @@ class CalcularPapelWizard(ModelView):
 
     @fields.depends('producto_papel')
     def on_change_with_postura_trabajo(self, name=None):
-        print "on_change_with_postura_trabajo"
+        logger.info('on_change_with_postura_trabajo')
         if self.producto_papel is None:
             return None
 
@@ -591,7 +593,7 @@ class CalcularPapelWizard(ModelView):
 
     @fields.depends('producto_papel')
     def on_change_with_postura_papel(self, name=None):
-        print "on_change_with_postura_papel"
+        logger.info('on_change_with_postura_papel')
         if self.producto_papel is None:
             return None
 
@@ -599,7 +601,7 @@ class CalcularPapelWizard(ModelView):
 
     @fields.depends('producto_papel')
     def on_change_with_pliegos_netos(self, name=None):
-        print "on_change_with_pliegos_netos"
+        logger.info('on_change_with_pliegos_netos')
         if self.producto_papel is None:
             return None
 
@@ -607,7 +609,7 @@ class CalcularPapelWizard(ModelView):
 
     @fields.depends('producto_papel')
     def on_change_with_trabajos_por_pliego(self, name=None):
-        print "on_change_with_formato_pliego"
+        logger.info('on_change_with_formato_pliego')
         if self.producto_papel is None:
             return None
 
@@ -615,7 +617,7 @@ class CalcularPapelWizard(ModelView):
 
     @fields.depends('producto_papel')
     def on_change_with_formato_pliego(self, name=None):
-        print "on_change_with_formato_pliego"
+        logger.info('on_change_with_formato_pliego')
         if self.producto_papel is None:
             return None
 
@@ -808,7 +810,7 @@ class CalcularPapel(Wizard):
 
     def default_interior(cls, fields):
         "Crear las lineas de producto en la venta"
-        print "default_interior"
+        logger.info('default_interior')
         ## Desde aca puedo crear las lineas de los productos.
         # Primero preguntar si cls.interior.producto_papel es distinto de None.
         # Si es asi, entonces cargo las lineas.
@@ -835,7 +837,7 @@ class CalcularPapel(Wizard):
             try:
                 ut.borrar_productos_temporales(cls.interior.id_wizard_start)
             except:
-                print "Primera vez que se ejecuta la pantalla. No se pudo borrar productos temporales"
+                logger.info('Primera vez que se ejecuta la pantalla. No se pudo borrar productos temporales')
 
             return res
 
@@ -847,7 +849,7 @@ class CalcularPapel(Wizard):
 
     def transition_terminar(self):
         "Crear las lineas de producto en la venta y finalizar wizard"
-        print "Borrar lineas del producto temporal al Finalizar Wizard"
+        logger.info('Borrar lineas del producto temporal al Finalizar Wizard')
 
         pool = Pool()
         t = Transaction()
@@ -861,7 +863,7 @@ class CalcularPapel(Wizard):
             try:
                 ut.borrar_productos_temporales(self.interior.id_wizard_start)
             except:
-                print "Primera vez que se ejecuta la pantalla. No se pudo borrar productos temporales"
+                logger.info('Primera vez que se ejecuta la pantalla. No se pudo borrar productos temporales')
 
             # Debo verificar que la venta ya tiene lineas de venta. Si es así,
             # calcular otras cantidades y return 'end'.
@@ -896,7 +898,7 @@ class RetomarCalcularPapel(Wizard):
 
     def default_elegir_interior(cls, fields):
         "Elegir que orden de trabajo retoma el wizard"
-        print "default_elegir_interior"
+        logger.info('default_elegir_interior')
         t = Transaction()
         res = {
             'sale_id': t.context['active_id'],
@@ -905,7 +907,7 @@ class RetomarCalcularPapel(Wizard):
 
     def default_interior(cls, fields):
         "Crear las lineas de producto en la venta"
-        print "default_retomar_calcular_papel_interior"
+        logger.info('default_retomar_calcular_papel_interior')
         pool = Pool()
         ut = utils()
         orden_trabajo_obj = pool.get('sale_printery_budget.orden_trabajo')
@@ -959,7 +961,7 @@ class RetomarCalcularPapel(Wizard):
 
     def transition_terminar(self):
         "Crear las lineas de producto en la venta y finalizar wizard"
-        print "Borrar lineas del producto temporal al Finalizar Wizard"
+        logger.info('Borrar lineas del producto temporal al Finalizar Wizard')
 
         pool = Pool()
         t = Transaction()

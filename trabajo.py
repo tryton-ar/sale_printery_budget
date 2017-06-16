@@ -8,6 +8,8 @@ from trytond.model import ModelView, ModelSQL, fields, Workflow
 from trytond.pyson import Id
 from trytond.pyson import Eval
 from trytond.modules.company import CompanyReport
+import logging
+logger = logging.getLogger(__name__)
 
 ORIENTACION = [
     ('', ''),
@@ -140,28 +142,28 @@ class OrdenTrabajo(Workflow, ModelSQL, ModelView):
     @ModelView.button
     @Workflow.transition('confirmed')
     def confirmed(cls, ordenes_trabajo):
-        print "Call def confirmed"
+        logger.info('Call def confirmed')
         pass
 
     @classmethod
     @ModelView.button
     @Workflow.transition('process')
     def process(cls, ordenes_trabajo):
-        print "Call def process"
+        logger.info('Call def process')
         pass
 
     @classmethod
     @ModelView.button
     @Workflow.transition('done')
     def done(cls, ordenes_trabajo):
-        print "Call def done"
+        logger.info('Call def done')
         pass
 
     @classmethod
     @ModelView.button
     @Workflow.transition('cancel')
     def cancel(cls, ordenes_trabajo):
-        print "Call def cancel"
+        logger.info('Call def cancel')
         pass
 
 

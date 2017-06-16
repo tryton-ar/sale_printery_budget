@@ -10,17 +10,19 @@ from math import ceil
 from trytond.pool import Pool
 #from trytond.pyson import Eval, Id, Bool, Not
 from trytond.transaction import Transaction
+import logging
+logger = logging.getLogger(__name__)
 
 class utils():
 
     interior = {}
 
     def test(self):
-        print "testeando" + str(self.interior.calle_horizontal)
+        logger.info(u'testeando: %s', str(self.interior.calle_horizontal))
 
     def creo_orden_trabajo(cls, sale, lineas_venta):
         "Crear orden de trabajo basado en el papel elegido"
-        print "Creo orden trabajo"
+        logger.info('Creo orden de trabajo')
         pool = Pool()
         t = Transaction()
         orden_trabajo_line = {}
