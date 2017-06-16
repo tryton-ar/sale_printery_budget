@@ -11,6 +11,8 @@ from trytond.modules.company import CompanyReport
 import logging
 logger = logging.getLogger(__name__)
 
+_all__ = ['OrdenTrabajo', 'OrdenTrabajoReport']
+
 ORIENTACION = [
     ('', ''),
     ('frente', 'Frente'),

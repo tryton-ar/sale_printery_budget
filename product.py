@@ -2,9 +2,9 @@
 #This file is part sale_printery_budget module for Tryton.
 #The COPYRIGHT file at the top level of this repository contains
 #the full copyright notices and license terms.
-from trytond.model import ModelView, ModelSQL, fields
+from trytond.model import fields
 from trytond.pyson import Eval, Equal, Bool, Or, Id, Not
-#from trytond.pool import Pool
+from trytond.pool import PoolMeta
 
 _all__ = ['Template']
 
@@ -30,8 +30,8 @@ TYPES_PRINTERY = [
     ('otros', 'Otros'),
     ]
 
-class Template(ModelSQL, ModelView):
-    "Product Template"
+class Template:
+    __metaclass__ = PoolMeta
     __name__ = "product.template"
 
     product_type_printery = fields.Selection(TYPES_PRINTERY, 'Product Types', required=True, states=STATES,depends=DEPENDS)
@@ -162,9 +162,5 @@ class Template(ModelSQL, ModelView):
 
     @fields.depends('product_type_printery')
     def on_change_product_type_printery(self, name=None):
-        res = {}
         if self.product_type_printery == 'papel':
-            res = {
-                'use_info_unit': True
-            }
-        return res
+            self.use_info_unit = True
