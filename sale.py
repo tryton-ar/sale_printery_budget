@@ -77,11 +77,10 @@ class OtraCantidad(ModelSQL, ModelView):
             if line.product is None:
                 return False
 
-            pool = Pool()
-            producto = pool.get('product.product')
+            Product = Pool().get('product.product')
             genera_contribucion_marginal = line.product.genera_contribucion_marginal
 
-            if type(line.product) is not producto:
+            if type(line.product) is not Product:
                 return False
 
             if genera_contribucion_marginal:
@@ -123,9 +122,9 @@ class OtraCantidad(ModelSQL, ModelView):
 
     @classmethod
     def calcular_total(self, sale, cantidad, utilidad):
-        obj = Pool().get('currency.currency')
+        Currency = Pool().get('currency.currency')
         gastos = self._calcular_gastos(sale, cantidad, lambda x: True)
-        return obj.round(sale.currency, gastos * (100 + utilidad) / 100)
+        return Currency.round(sale.currency, gastos * (100 + utilidad) / 100)
 
 
 class Sale:
@@ -195,13 +194,12 @@ class Sale:
     @classmethod
     def vencimiento_trigger(self):
         ''' Cambia el estado a vencimiento de las ventas presupuestadas hace mas de 15 días '''
-        pool = Pool()
-        sale_obj = pool.get('sale.sale')
+        Sale = Pool().get('sale.sale')
 
         # Chequear la function trigger_write.
         #http://doc.tryton.org/3.0/trytond/doc/ref/models/models.html#trytond.model.ModelStorage.trigger_write
-        sales = sale_obj.search([('state', '=', 'quotation'), ('write_date', '<', datetime.datetime.now() - datetime.timedelta(days=15))])
-        sale_obj.write([s['id'] for s in sales], {'state': 'expired'})
+        sales = Sale.search([('state', '=', 'quotation'), ('write_date', '<', datetime.datetime.now() - datetime.timedelta(days=15))])
+        Sale.write([s['id'] for s in sales], {'state': 'expired'})
 
     @classmethod
     @ModelView.button_action('sale_printery_budget.wizard_calcular_papel')
@@ -228,21 +226,21 @@ class Sale:
     @Workflow.transition('confirmed')
     def confirm(self, sales):
         pool = Pool()
-        sale_obj = pool.get('sale.sale')
-        line_obj = pool.get('sale.line')
-        cantidades_obj = pool.get('sale_printery_budget.otra_cantidad')
-        producto_obj = pool.get('product.product')
-        uom_obj = pool.get('product.uom')
-        orden_trabajo_obj = pool.get('sale_printery_budget.orden_trabajo')
-        producto_temp_obj = pool.get('sale_printery_budget.calcular_papel.producto')
+        Sale = pool.get('sale.sale')
+        SaleLine = pool.get('sale.line')
+        OtraCantidad = pool.get('sale_printery_budget.otra_cantidad')
+        Product = pool.get('product.product')
+        Uom = pool.get('product.uom')
+        OrdenTrabajo = pool.get('sale_printery_budget.orden_trabajo')
+        CalcularPapelProducto = pool.get('sale_printery_budget.calcular_papel.producto')
         for sale in sales:
             if not sale.cantidad_confirmada:
                 self.raise_user_error('miss_cantidad')
-            cantidad_vals = cantidades_obj.search_read([('id', '=', sale.cantidad_confirmada.id)], fields_names=['cantidad', 'utilidad'])[0]
+            cantidad_vals = OtraCantidad.search_read([('id', '=', sale.cantidad_confirmada.id)], fields_names=['cantidad', 'utilidad'])[0]
             cantidad_confirmada = cantidad_vals['cantidad']
             utilidad = cantidad_vals['utilidad']
 
-            utilidad_producto = producto_obj.search([('product_type_printery', '=', \
+            utilidad_producto = Product.search([('product_type_printery', '=', \
                                     'utilidad')])[0]
             # Agregar línea utilidad
             sale_line = {
@@ -251,34 +249,34 @@ class Sale:
                     'product': utilidad_producto.id,
                     'type': 'line',
                     'quantity': 1,
-                    'unit': uom_obj.search_read([('id', '=', Id('product', 'uom_unit').pyson())],fields_names=['id'])[0]['id'],
-                    'unit_price': Decimal(cantidades_obj._calcular_gastos(sale, cantidad_confirmada, lambda x: True) * utilidad / 100).quantize(Decimal('.01')),
+                    'unit': Uom.search_read([('id', '=', Id('product', 'uom_unit').pyson())],fields_names=['id'])[0]['id'],
+                    'unit_price': Decimal(OtraCantidad._calcular_gastos(sale, cantidad_confirmada, lambda x: True) * utilidad / 100).quantize(Decimal('.01')),
                     'description': 'Utilidad (%d %%)' % utilidad,
                     'fijo': True,
                     }
-            line_obj.create([sale_line])
+            SaleLine.create([sale_line])
 
         # Actualizamos las lineas
         escala = float(cantidad_confirmada) / sale.cantidad
-        line_ids = line_obj.search([('sale', '=', sale.id)])
+        line_ids = SaleLine.search([('sale', '=', sale.id)])
         interiores_ids = set()
-        for line in line_obj.browse(line_ids):
+        for line in SaleLine.browse(line_ids):
             if line.type == 'line' and not line.fijo:
                 if line.unit_digits is 0:
                     unit_digits = '0'
                 else:
                     unit_digits = '.01'
-                line_obj.write([line], {'quantity': Decimal(line.quantity * escala).quantize(Decimal(unit_digits))})
+                SaleLine.write([line], {'quantity': Decimal(line.quantity * escala).quantize(Decimal(unit_digits))})
 
             if line.type == 'line' and line.id_interior is not None:
                 interiores_ids.add(line.id_interior)
 
-        sale_obj.write([sale], {'cantidad': cantidad_confirmada})
+        SaleLine.write([sale], {'cantidad': cantidad_confirmada})
         # Paso a confirmado las ordenes de trabajo correspondientes.
         # Borrar ordenes de trabajo que no tienen linea de venta.
         # Actualizar ordenes de trabajo con la cantidad confirmada.
         for interior_id in interiores_ids:
-            orden_trabajo = orden_trabajo_obj.search([('id_interior', '=', interior_id), ('sale', '=', sale.id)])[0]
+            orden_trabajo = OrdenTrabajo.search([('id_interior', '=', interior_id), ('sale', '=', sale.id)])[0]
             # Actualizamos lineas:
             #- Pliegos Netos
             #- Cantidad de Planchas (V)
@@ -300,13 +298,13 @@ class Sale:
                 'tiempo_impresion':Decimal(orden_trabajo.tiempo_impresion * Decimal(escala)).quantize(Decimal('.01')),
             }
 
-            orden_trabajo_obj.write([orden_trabajo], update_line)
+            OrdenTrabajo.write([orden_trabajo], update_line)
 
-        ordenes_trabajo = orden_trabajo_obj.search([('sale', '=', sale.id), ('state', '=', 'draft')])
-        orden_trabajo_obj.delete(ordenes_trabajo)
+        ordenes_trabajo = OrdenTrabajo.search([('sale', '=', sale.id), ('state', '=', 'draft')])
+        OrdenTrabajo.delete(ordenes_trabajo)
         # Borro productos temporales asociados a la venta.
-        productos_temporales = producto_temp_obj.search([('sale_id', '=', sale.id)])
-        producto_temp_obj.delete(productos_temporales)
+        productos_temporales = CalcularPapelProducto.search([('sale_id', '=', sale.id)])
+        CalcularPapelProducto.delete(productos_temporales)
 
         super(Sale, self).confirm(sales)
 
@@ -682,7 +680,7 @@ class CalcularPapelWizard(ModelView):
         productos_a_borrar = CalcularPapelProducto.search([('id_wizard', '=',
                                                        id_wizard_start)])
         with Transaction().new_cursor():
-            producto_wiz_obj.delete(productos_a_borrar)
+            CalcularPapelProducto.delete(productos_a_borrar)
             Transaction().cursor.commit()
 
     def _agregar_datos_y_crear_producto_papel(self, tmp, values):
@@ -802,18 +800,17 @@ class CalcularPapel(Wizard):
 
     terminar = StateTransition()
 
-    def default_interior(cls, fields):
+    def default_interior(self, fields):
         "Crear las lineas de producto en la venta"
         logger.info('default_interior')
         ## Desde aca puedo crear las lineas de los productos.
         # Primero preguntar si cls.interior.producto_papel es distinto de None.
         # Si es asi, entonces cargo las lineas.
-        pool = Pool()
         t = Transaction()
-        sale_obj = pool.get('sale.sale')
+        Sale = Pool().get('sale.sale')
         ut = utils()
         ut.interior = cls.interior
-        sale = sale_obj.search([('id', '=', t.context['active_id'])])[0]
+        sale = Sale.search([('id', '=', t.context['active_id'])])[0]
         res = {
             'categoria': 'folleto',
             'calle_horizontal': Decimal('0.5'),
@@ -826,10 +823,10 @@ class CalcularPapel(Wizard):
             'sale_id': sale.id,
         }
 
-        if hasattr(cls.interior, 'producto_papel') == False or cls.interior.producto_papel is None:
+        if hasattr(self.interior, 'producto_papel') == False or self.interior.producto_papel is None:
             # Primera vez que se ejecuta la pantalla interior.
             try:
-                ut.borrar_productos_temporales(cls.interior.id_wizard_start)
+                ut.borrar_productos_temporales(self.interior.id_wizard_start)
             except:
                 logger.info('Primera vez que se ejecuta la pantalla. No se pudo borrar productos temporales')
 
@@ -838,17 +835,16 @@ class CalcularPapel(Wizard):
         lineas_venta = ut.creo_lineas_de_venta()
         ut.creo_orden_trabajo(sale, lineas_venta)
         ut.crear_otra_cantidad_base(sale)
-        ut.borrar_productos_temporales(cls.interior.id_wizard_start)
+        ut.borrar_productos_temporales(self.interior.id_wizard_start)
         return res
 
     def transition_terminar(self):
         "Crear las lineas de producto en la venta y finalizar wizard"
         logger.info('Borrar lineas del producto temporal al Finalizar Wizard')
 
-        pool = Pool()
         t = Transaction()
-        sale_obj = pool.get('sale.sale')
-        sale = sale_obj.search([('id', '=', t.context['active_id'])])[0]
+        Sale = Pool().get('sale.sale')
+        sale = Sale.search([('id', '=', t.context['active_id'])])[0]
         ut = utils()
         ut.interior = self.interior
 
@@ -890,7 +886,7 @@ class RetomarCalcularPapel(Wizard):
 
     terminar = StateTransition()
 
-    def default_elegir_interior(cls, fields):
+    def default_elegir_interior(self, fields):
         "Elegir que orden de trabajo retoma el wizard"
         logger.info('default_elegir_interior')
         t = Transaction()
@@ -899,13 +895,13 @@ class RetomarCalcularPapel(Wizard):
         }
         return res
 
-    def default_interior(cls, fields):
+    def default_interior(self, fields):
         "Crear las lineas de producto en la venta"
         logger.info('default_retomar_calcular_papel_interior')
         pool = Pool()
         ut = utils()
-        orden_trabajo_obj = pool.get('sale_printery_budget.orden_trabajo')
-        interior = orden_trabajo_obj.search([('id', '=', cls.elegir_interior.orden_trabajo.id)])[0]
+        OrdenTrabajo = pool.get('sale_printery_budget.orden_trabajo')
+        interior = OrdenTrabajo.search([('id', '=', self.elegir_interior.orden_trabajo.id)])[0]
         # Borrar producto temporal anterior
         ut.interior = interior
         ut.borrar_productos_temporales(interior.id_interior)
@@ -960,15 +956,15 @@ class RetomarCalcularPapel(Wizard):
         pool = Pool()
         t = Transaction()
         ut = utils()
-        sale_obj = pool.get('sale.sale')
-        sale = sale_obj.search([('id', '=', t.context['active_id'])])[0]
-        orden_trabajo_obj = pool.get('sale_printery_budget.orden_trabajo')
-        sale_line_obj = pool.get('sale.line')
-        interior = orden_trabajo_obj.search([('id', '=', self.elegir_interior.orden_trabajo.id)])[0]
-        sale_lines = sale_line_obj.search(['id_interior', '=', interior.id_interior])
+        Sale = pool.get('sale.sale')
+        sale = Sale.search([('id', '=', t.context['active_id'])])[0]
+        OrdenTrabajo = pool.get('sale_printery_budget.orden_trabajo')
+        SaleLine = pool.get('sale.line')
+        interior = OrdenTrabajo.search([('id', '=', self.elegir_interior.orden_trabajo.id)])[0]
+        sale_lines = SaleLine.search(['id_interior', '=', interior.id_interior])
         # Borrar lineas anteriores y orden de trabajo anterior
-        sale_line_obj.delete(sale_lines)
-        orden_trabajo_obj.delete([interior])
+        SaleLine.delete(sale_lines)
+        OrdenTrabajo.delete([interior])
 
         # Genero lineas nuevas.
         ut.interior = self.interior
