@@ -97,7 +97,6 @@
            <field name="report_name">sale_printery_budget.presupuesto_cliente</field>
            <field name="model">sale.sale</field>
            <field name="report">sale_printery_budget/presupuesto_cliente.odt</field>
-           <field name="style">sale_printery_budget/header_imprenta.odt</field>
            <field name="template_extension">odt</field>
        </record>
 

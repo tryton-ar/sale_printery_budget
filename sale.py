@@ -313,14 +313,12 @@ class PresupuestoClienteReport(Report):
     __name__ = 'sale_printery_budget.presupuesto_cliente'
 
     @classmethod
-    def parse(cls, report, records, data, localcontext):
+    def get_context(cls, records, data):
         pool = Pool()
         User = pool.get('res.user')
         user = User(Transaction().user)
-
-        localcontext['company'] = user.company
-        return super(PresupuestoClienteReport, cls).parse(report, records, data,
-                localcontext=localcontext)
+        report_context['company'] = user.company
+        return super(PresupuestoClienteReport, cls).get_context(records, data)
 
 
 class SaleLine:
