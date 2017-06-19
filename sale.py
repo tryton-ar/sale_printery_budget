@@ -652,7 +652,7 @@ class CalcularPapelWizard(ModelView):
             id_wizard = str(uuid.uuid1())
             self.id_wizard_start = id_wizard
             Product = Pool().get('product.product')
-            papeles = Product.search([('category', '=', values.tipo_papel),
+            papeles = Product.search([('categories', 'in', [values.tipo_papel.id]),
                                               ('weight', '=', values.gramaje),
                                               ('product_type_printery', '=', 'papel')])
 

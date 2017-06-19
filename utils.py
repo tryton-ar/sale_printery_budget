@@ -83,7 +83,7 @@ class utils():
         # Si no existe otra cantidad con la cantidad de cantidad base, crearla
         pool = Pool()
         t = Transaction()
-        if not sale.cantidad in [c['cantidad'] for c in sale.otra_cantidad]:
+        if not sale.cantidad in [c.cantidad for c in sale.otra_cantidad]:
             cantidad_nueva = {'cantidad': sale.cantidad,
                                 'utilidad': 30,
                                 'sale_id': t.context['active_id']}
