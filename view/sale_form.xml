@@ -17,8 +17,7 @@ this repository contains the full copyright notices and license terms. -->
         </group>
     </xpath>
     <xpath expr="/form/notebook" position="inside">
-        <page string="Otras Cantidades" id="otra_cantidad"
-            states="{'invisible': ~Eval('state').in_(['draft', 'quotation'])}" >
+        <page string="Otras Cantidades" id="otra_cantidad">
             <field name="otra_cantidad"/>
         </page>
         <page string="Ordenes de Trabajo" id="orden_trabajo" >

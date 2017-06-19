@@ -15,8 +15,7 @@ this repository contains the full copyright notices and license terms. -->
             <field name="rendimiento_tinta"/>
      </xpath>
     <xpath expr="/form/notebook" position="inside">
-        <page string="Mediciones Maquina" col="4" id="mediciones_maquina"
-            states="{'invisible':Not(Eval('product_type_printery').in_(['maquina']))}">
+        <page string="Mediciones Maquina" col="4" id="mediciones_maquina">
             <label name="height_max" string="Formato Maximo"/>
             <field name="height_max"/>
             <field name="width_max"/>
@@ -70,8 +69,7 @@ this repository contains the full copyright notices and license terms. -->
             <label name="demasia_variable"/>
             <field name="demasia_variable"/>
         </page>
-        <page string="Terminacion Superficial" col="4" id="terminacion_superficial"
-            states="{'invisible':Not(Eval('product_type_printery').in_(['maquina_doblado','maquina_laminado', 'maquina_encuadernacion']))}">
+        <page string="Terminacion Superficial" col="4" id="terminacion_superficial">
             <label name="velocidad_maq"/>
             <field name="velocidad_maq"/>
             <newline />
