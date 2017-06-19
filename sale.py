@@ -324,8 +324,9 @@ class PresupuestoClienteReport(Report):
         pool = Pool()
         User = pool.get('res.user')
         user = User(Transaction().user)
+        report_context = super(PresupuestoClienteReport, cls).get_context(records, data)
         report_context['company'] = user.company
-        return super(PresupuestoClienteReport, cls).get_context(records, data)
+        return report_context
 
 
 class SaleLine:
