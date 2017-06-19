@@ -160,6 +160,17 @@ class Template:
                                      'invisible':  Not(Equal(Eval('product_type_printery'), 'maquina'))
                                  })
 
+    @classmethod
+    def view_attributes(cls):
+        return super(Template, cls).view_attributes() + [
+            ('//page[@id="mediciones_maquina"]', 'states', {
+                    'invisible': Not(Eval('product_type_printery').in_(['maquina'])),
+                    }),
+            ('//page[@id="terminacion_superficial"]', 'states', {
+                    'invisible': Not(Eval('product_type_printery').in_(['maquina_doblado', 'maquina_laminado', 'maquina_encuadernacion'])),
+                    })
+            ]
+
     @fields.depends('product_type_printery')
     def on_change_product_type_printery(self, name=None):
         if self.product_type_printery == 'papel':
