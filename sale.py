@@ -202,6 +202,13 @@ class Sale:
         Sale.write([s['id'] for s in sales], {'state': 'expired'})
 
     @classmethod
+    def view_attributes(cls):
+        return super(Sale, cls).view_attributes() + [
+            ('//page[@id="otra_cantidad"]', 'states', {
+                    'invisible': ~Eval('state').in_(['draft', 'quotation']),
+                    })]
+
+    @classmethod
     @ModelView.button_action('sale_printery_budget.wizard_calcular_papel')
     def calcular_papel(cls, sales):
         pass
