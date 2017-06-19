@@ -39,7 +39,7 @@ the full copyright notices and license terms. -->
             <label name="tinta_superficie_cubierta" />
             <field name="tinta_superficie_cubierta" />
             <newline />
-            <separator name="term_superficial" string="Terminacion Superficial" colspan="6"/>
+            <separator id="term_superficial" string="Terminacion Superficial" colspan="6"/>
             <newline />
             <label name="doblado" />
             <field name="doblado" />

@@ -684,9 +684,9 @@ class CalcularPapelWizard(ModelView):
         CalcularPapelProducto = Pool().get('sale_printery_budget.calcular_papel.producto')
         productos_a_borrar = CalcularPapelProducto.search([('id_wizard', '=',
                                                        id_wizard_start)])
-        with Transaction().new_cursor():
+        with Transaction().new_transaction() as transaction:
             CalcularPapelProducto.delete(productos_a_borrar)
-            Transaction().cursor.commit()
+            transaction.commit()
 
     def _agregar_datos_y_crear_producto_papel(self, tmp, values):
         """ Recibe papel, tamaño del producto, y maquina """
@@ -787,9 +787,9 @@ class CalcularPapelWizard(ModelView):
                             papel['producto_id'] = papel['producto_id']
                             papel['sale_id'] = sale_id
 
-                            with Transaction().new_cursor():
+                            with Transaction().new_transaction() as transaction:
                                 CalcularPapelProducto.create([papel])
-                                Transaction().cursor.commit()
+                                transaction.commit()
 
 
 class CalcularPapel(Wizard):
@@ -814,7 +814,7 @@ class CalcularPapel(Wizard):
         t = Transaction()
         Sale = Pool().get('sale.sale')
         ut = utils()
-        ut.interior = cls.interior
+        ut.interior = self.interior
         sale = Sale.search([('id', '=', t.context['active_id'])])[0]
         res = {
             'categoria': 'folleto',
