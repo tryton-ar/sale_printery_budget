@@ -425,10 +425,10 @@ class CalcularPapelWizard(ModelView):
     colores_frente = fields.Integer(u'Colores Frente', required=True)
     colores_dorso = fields.Integer(u'Colores Dorso', required=True)
     doblado = fields.Many2One('product.product', u'Doblado',
-                                        domain=[('product_type_printery', '=', 'maquina_doblado')],
+                                        domain=[('template.product_type_printery', '=', 'maquina_doblado')],
                                         required=False)
     encuadernado = fields.Many2One('product.product', u'Encuadernado',
-                                     domain=[('product_type_printery', '=', 'maquina_encuadernacion')],
+                                     domain=[('template.product_type_printery', '=', 'maquina_encuadernacion')],
                                      required=False,
                                      depends=['categoria'],
                                      states={
@@ -439,13 +439,13 @@ class CalcularPapelWizard(ModelView):
         'required': Bool(Eval('encuadernado')),
     }, depends=['categoria', 'encuadernado'])
     laminado = fields.Many2One('product.product', u'Laminado',
-                                        domain=[('product_type_printery', '=', 'maquina_laminado')],
+                                        domain=[('template.product_type_printery', '=', 'maquina_laminado')],
                                         required=False)
     laminado_orientacion = fields.Selection(ORIENTACION, 'Laminado Orientacion', states={
         'required': Bool(Eval('laminado')),
     }, depends=['laminado'])
     maquina = fields.Many2One('product.product', u'Máquina',
-                              domain=[('product_type_printery', '=', 'maquina')],
+                              domain=[('template.product_type_printery', '=', 'maquina')],
                               required=True)
     producto_papel = fields.Many2One('sale_printery_budget.calcular_papel.producto',
                         u'Papel',
@@ -455,7 +455,7 @@ class CalcularPapelWizard(ModelView):
     demasia_variable = fields.Integer('Demasia Variable(%)', required=True)
     demasia_fija = fields.Integer('Demasia Fija', required=True)
     tinta = fields.Many2One('product.product', u'Tinta',
-                              domain=[('product_type_printery', '=', 'tinta')],
+                              domain=[('template.product_type_printery', '=', 'tinta')],
                               required=True)
     tinta_superficie_cubierta = fields.Integer('Tinta (superficie Cubierta(%))', required=True)
     velocidad_maquina = fields.Selection([
