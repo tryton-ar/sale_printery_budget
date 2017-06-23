@@ -221,19 +221,18 @@ class Sale:
     @classmethod
     @ModelView.button
     @Workflow.transition('quotation')
-    def quote(self, sales):
+    def quote(cls, sales):
         for sale in sales:
             if not sale.otra_cantidad:
-                self.raise_user_error('miss_otras_cantidades')
+                cls.raise_user_error('miss_otras_cantidades')
 
-        super(Sale, self).quote(sales)
+        return super(Sale, cls).quote(sales)
 
     @classmethod
     @ModelView.button
     @Workflow.transition('confirmed')
-    def confirm(self, sales):
+    def confirm(cls, sales):
         pool = Pool()
-        Sale = pool.get('sale.sale')
         SaleLine = pool.get('sale.line')
         OtraCantidad = pool.get('sale_printery_budget.otra_cantidad')
         Product = pool.get('product.product')
@@ -242,7 +241,7 @@ class Sale:
         CalcularPapelProducto = pool.get('sale_printery_budget.calcular_papel.producto')
         for sale in sales:
             if not sale.cantidad_confirmada:
-                self.raise_user_error('miss_cantidad')
+                cls.raise_user_error('miss_cantidad')
             cantidad_vals = OtraCantidad.search_read([('id', '=', sale.cantidad_confirmada.id)], fields_names=['cantidad', 'utilidad'])[0]
             cantidad_confirmada = cantidad_vals['cantidad']
             utilidad = cantidad_vals['utilidad']
@@ -278,7 +277,7 @@ class Sale:
             if line.type == 'line' and line.id_interior is not None:
                 interiores_ids.add(line.id_interior)
 
-        Sale.write([sale], {'cantidad': cantidad_confirmada})
+        cls.write([sale], {'cantidad': cantidad_confirmada})
         # Paso a confirmado las ordenes de trabajo correspondientes.
         # Borrar ordenes de trabajo que no tienen linea de venta.
         # Actualizar ordenes de trabajo con la cantidad confirmada.
@@ -313,7 +312,7 @@ class Sale:
         productos_temporales = CalcularPapelProducto.search([('sale_id', '=', sale.id)])
         CalcularPapelProducto.delete(productos_temporales)
 
-        super(Sale, self).confirm(sales)
+        return super(Sale, cls).confirm(sales)
 
 
 class PresupuestoClienteReport(Report):
