@@ -278,7 +278,7 @@ class Sale:
             if line.type == 'line' and line.id_interior is not None:
                 interiores_ids.add(line.id_interior)
 
-        SaleLine.write([sale], {'cantidad': cantidad_confirmada})
+        Sale.write([sale], {'cantidad': cantidad_confirmada})
         # Paso a confirmado las ordenes de trabajo correspondientes.
         # Borrar ordenes de trabajo que no tienen linea de venta.
         # Actualizar ordenes de trabajo con la cantidad confirmada.
