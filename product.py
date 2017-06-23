@@ -128,17 +128,27 @@ class Template:
                                   domain=[('category', '=', Id('product', 'uom_cat_length'))],
                                   depends=['pinza', 'cola', 'laterales'])
 
-    velocidad_maq = fields.Numeric('Velocidad (metros / hora)', digits=(16, 2))
-    tiempo_arreglo = fields.Numeric('Tiempo de arreglo (hs)', digits=(16, 2))
+    velocidad_maq = fields.Numeric('Velocidad (metros / hora)', digits=(16, 2),
+                              states={
+                                  'invisible':  ~Eval('product_type_printery').in_(['maquina_laminado', 'maquina_encuadernacion', 'maquina_doblado']),
+                                  'required':  Eval('product_type_printery').in_(['maquina_laminado', 'maquina_encuadernacion', 'maquina_doblado']),
+                              })
+    tiempo_arreglo = fields.Numeric('Tiempo de arreglo (hs)', digits=(16, 2),
+                              states={
+                                  'invisible':  ~Eval('product_type_printery').in_(['maquina_laminado', 'maquina_encuadernacion']),
+                                  'required':  Eval('product_type_printery').in_(['maquina_laminado', 'maquina_encuadernacion']),
+                              })
     broche = fields.Many2One('product.product', u'Broche',
                               states={
-                                  'invisible':  Not(Equal(Eval('product_type_printery'), 'maquina_encuadernacion'))
+                                  'invisible':  Not(Equal(Eval('product_type_printery'), 'maquina_encuadernacion')),
+                                  'required':  Equal(Eval('product_type_printery'), 'maquina_encuadernacion'),
                               },
                               domain=[('product_type_printery', '=', 'broche')],
                               required=False)
     material_laminado = fields.Many2One('product.product', u'Material Laminado',
                               states={
-                                  'invisible':  Not(Equal(Eval('product_type_printery'), 'maquina_laminado'))
+                                  'invisible':  Not(Equal(Eval('product_type_printery'), 'maquina_laminado')),
+                                  'required':  Equal(Eval('product_type_printery'), 'maquina_laminado'),
                               },
                               domain=[('product_type_printery', '=', 'material_laminado')],
                               required=False)
@@ -149,7 +159,8 @@ class Template:
                                  })
     rendimiento_tinta = fields.Integer(u'Rendimiento de Tinta (gr/m2)',
                                  states={
-                                     'invisible':  Not(Equal(Eval('product_type_printery'), 'tinta'))
+                                     'invisible':  Not(Equal(Eval('product_type_printery'), 'tinta')),
+                                     'required':  Eval('product_type_printery').in_(['tinta']),
                                  })
     demasia_fija = fields.Integer(u'Demasia Fija',
                                  states={
