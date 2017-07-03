@@ -24,6 +24,7 @@ class OrdenTrabajo(Workflow, ModelSQL, ModelView):
     "Ordenes de Trabajo"
     __name__ = 'sale_printery_budget.orden_trabajo'
 
+    number = fields.Integer('Number', readonly=True)
     name = fields.Function(fields.Char('Name'), 'get_name')
     id_interior = fields.Char('id interior', readonly=True)
     state = fields.Selection([
@@ -170,4 +171,9 @@ class OrdenTrabajo(Workflow, ModelSQL, ModelView):
 
 
 class OrdenTrabajoReport(Report):
+    'OrdenTrabajoReport'
     __name__ = 'sale_printery_budget.orden_trabajo'
+
+    @classmethod
+    def get_context(cls, records, data):
+        return super(OrdenTrabajoReport, cls).get_context(records, data)
