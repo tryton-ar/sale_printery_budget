@@ -30,11 +30,11 @@ the full copyright notices and license terms. -->
         </record>
 
        <record model="ir.action.report" id="report_orden_trabajo">
+           <field name="active" eval="True"/>
            <field name="name">Orden de trabajo</field>
-           <field name="report_name">sale_printery_budget.orden_trabajo</field>
            <field name="model">sale_printery_budget.orden_trabajo</field>
-           <field name="report">sale_printery_budget/orden_trabajo.odt</field>
-           <field name="template_extension">odt</field>
+           <field name="report_name">sale_printery_budget.orden_trabajo</field>
+           <field name="report">sale_printery_budget/trabajo.odt</field>
        </record>
 
         <record model="ir.action.keyword" id="report_orden_trabajo_keyword">
