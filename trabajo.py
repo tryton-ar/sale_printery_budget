@@ -7,7 +7,7 @@ from trytond.model import ModelView, ModelSQL, fields, Workflow
 #from trytond.transaction import Transaction
 from trytond.pyson import Id
 from trytond.pyson import Eval
-from trytond.modules.company import CompanyReport
+from trytond.report import Report
 import logging
 logger = logging.getLogger(__name__)
 
@@ -169,5 +169,5 @@ class OrdenTrabajo(Workflow, ModelSQL, ModelView):
         pass
 
 
-class OrdenTrabajoReport(CompanyReport):
+class OrdenTrabajoReport(Report):
     __name__ = 'sale_printery_budget.orden_trabajo'

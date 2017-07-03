@@ -29,6 +29,20 @@ the full copyright notices and license terms. -->
             <field name="act_window" ref="act_trabajo_form"/>
         </record>
 
+       <record model="ir.action.report" id="report_orden_trabajo">
+           <field name="name">Orden de trabajo</field>
+           <field name="report_name">sale_printery_budget.orden_trabajo</field>
+           <field name="model">sale_printery_budget.orden_trabajo</field>
+           <field name="report">sale_printery_budget/orden_trabajo.odt</field>
+           <field name="template_extension">odt</field>
+       </record>
+
+        <record model="ir.action.keyword" id="report_orden_trabajo_keyword">
+            <field name="keyword">form_print</field>
+            <field name="model">sale_printery_budget.orden_trabajo,-1</field>
+            <field name="action" ref="report_orden_trabajo"/>
+        </record>
+
         <menuitem name="Ordenes de Trabajo" sequence="0" id="menu_trabajo" />
         <menuitem id="menu_sale_printery_budget_trabajo" parent="menu_trabajo" action="act_trabajo_form" icon="tryton-list"/>
     </data>
