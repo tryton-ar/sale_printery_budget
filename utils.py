@@ -130,10 +130,9 @@ class utils():
         SaleLine.create([sale_line])
 
         # Creamos línea de Planchas
-        if self.interior.plancha_adicional is not 0 or self.interior.plancha_adicional is not None:
-            planchas_totales = self.interior.cantidad_planchas + self.interior.plancha_adicional
-        else:
-            planchas_totales = self.interior.cantidad_planchas
+        if self.interior.plancha_adicional is None:
+            self.interior.plancha_adicional = 0
+        planchas_totales = self.interior.cantidad_planchas + self.interior.plancha_adicional
 
         res['planchas_totales'] = planchas_totales
         description = u'Plancha'
