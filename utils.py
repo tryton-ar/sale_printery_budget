@@ -1,19 +1,16 @@
-#This file is part of the sale_printery_budget module for Tryton.
-#The COPYRIGHT file at the top level of this repository contains
-#the full copyright notices and license terms.
+# This file is part of the sale_printery_budget module for Tryton.
+# The COPYRIGHT file at the top level of this repository contains
+# the full copyright notices and license terms.
 
 from decimal import Decimal
-#import datetime
-#import uuid
 from math import ceil
 from trytond.pool import Pool
-#from trytond.pyson import Eval, Id, Bool, Not
 from trytond.transaction import Transaction
 import logging
 logger = logging.getLogger(__name__)
 
-class utils():
 
+class utils():
     interior = {}
 
     def test(self):
@@ -27,7 +24,7 @@ class utils():
         orden_trabajo_line = {}
         OrdenTrabajo = pool.get('sale_printery_budget.orden_trabajo')
         orden_trabajo_line = {
-                'sale':  t.context.get('active_id'),
+                'sale': t.context.get('active_id'),
                 'state': 'draft',
                 'calle_horizontal': self.interior.calle_horizontal,
                 'calle_vertical': self.interior.calle_vertical,
@@ -60,9 +57,9 @@ class utils():
                 'desperdicio': self.interior.producto_papel.desperdicio,
                 'pliegos_demasia_fija': lineas_venta['demasia_fija'],
                 'pliegos_demasia_variable': lineas_venta['demasia_variable'],
-                'tiempo_arranque':  lineas_venta['tiempo_arranque'],
-                'tiempo_impresion':  lineas_venta['tiempo_impresion'],
-                'cantidad_tinta':  lineas_venta['cantidad_tinta'],
+                'tiempo_arranque': lineas_venta['tiempo_arranque'],
+                'tiempo_impresion': lineas_venta['tiempo_impresion'],
+                'cantidad_tinta': lineas_venta['cantidad_tinta'],
             }
 
         if hasattr(self.interior, 'doblado') != False and self.interior.doblado is not None:
@@ -79,13 +76,13 @@ class utils():
         OrdenTrabajo.create([orden_trabajo_line])
 
     def crear_otra_cantidad_base(self, sale):
-        # Si no existe otra cantidad con la cantidad de cantidad base, crearla
+        #  Si no existe otra cantidad con la cantidad de cantidad base, crearla
         pool = Pool()
         t = Transaction()
         if not sale.cantidad in [c.cantidad for c in sale.otra_cantidad]:
             cantidad_nueva = {'cantidad': sale.cantidad,
-                                'utilidad': 30,
-                                'sale_id': t.context['active_id']}
+                'utilidad': 30,
+                'sale_id': t.context['active_id']}
             OtraCantidad = pool.get('sale_printery_budget.otra_cantidad')
             OtraCantidad.create([cantidad_nueva])
 
@@ -93,7 +90,7 @@ class utils():
         pool = Pool()
         CalcularPapelProducto = pool.get('sale_printery_budget.calcular_papel.producto')
         productos_a_borrar = CalcularPapelProducto.search([('id_wizard', '=',
-                                                        id_wizard_start)])
+                    id_wizard_start)])
         CalcularPapelProducto.delete(productos_a_borrar)
 
     def creo_lineas_de_venta(self):
@@ -108,24 +105,24 @@ class utils():
         SaleLine = pool.get('sale.line')
         CalcularPapelProducto = pool.get('sale_printery_budget.calcular_papel.producto')
         papel_producto_wizard = CalcularPapelProducto.search([('id', '=',
-                                                        self.interior.producto_papel.id)])[0]
+                    self.interior.producto_papel.id)])[0]
         papel = Product.search([('id', '=',
-                                papel_producto_wizard.producto_id)])[0]
+                    papel_producto_wizard.producto_id)])[0]
         res = {}
 
         # Creamos línea de papel (variable)
         sale_line = {
-                'sale': t.context.get('active_id'),
-                'sequence': 0,
-                'type': 'line',
-                'quantity': papel_producto_wizard.cantidad_hojas,
-                'product': papel.id,
-                'unit': papel.sale_uom,
-                'unit_price': papel.list_price,
-                'description': 'Papel, Desperdicio (%): ' + str(papel_producto_wizard.desperdicio),
-                'fijo': False,
-                'id_interior': self.interior.id_wizard_start,
-                }
+            'sale': t.context.get('active_id'),
+            'sequence': 0,
+            'type': 'line',
+            'quantity': papel_producto_wizard.cantidad_hojas,
+            'product': papel.id,
+            'unit': papel.sale_uom,
+            'unit_price': papel.list_price,
+            'description': 'Papel, Desperdicio (%): ' + str(papel_producto_wizard.desperdicio),
+            'fijo': False,
+            'id_interior': self.interior.id_wizard_start,
+            }
         SaleLine.create([sale_line])
 
         # Creamos línea de Planchas
@@ -143,17 +140,17 @@ class utils():
         demasia_fija = self.interior.demasia_fija * planchas_totales
         res['demasia_fija'] = demasia_fija
         sale_line = {
-                'sale': t.context.get('active_id'),
-                'sequence': 0,
-                'type': 'line',
-                'quantity': demasia_fija,
-                'product': papel.id,
-                'unit': papel.sale_uom,
-                'unit_price': papel.list_price,
-                'description': 'Pliegos Demasia Fija',
-                'fijo': True,
-                'id_interior': self.interior.id_wizard_start,
-                }
+            'sale': t.context.get('active_id'),
+            'sequence': 0,
+            'type': 'line',
+            'quantity': demasia_fija,
+            'product': papel.id,
+            'unit': papel.sale_uom,
+            'unit_price': papel.list_price,
+            'description': 'Pliegos Demasia Fija',
+            'fijo': True,
+            'id_interior': self.interior.id_wizard_start,
+            }
         SaleLine.create([sale_line])
 
         # Creamos línea de Pliegos Demasia Variable
@@ -161,17 +158,17 @@ class utils():
         demasia_variable = (self.interior.demasia_variable * self.interior.producto_papel.cantidad_de_pliegos) // 100
         res['demasia_variable'] = demasia_variable
         sale_line = {
-                'sale': t.context.get('active_id'),
-                'sequence': 0,
-                'type': 'line',
-                'quantity': demasia_variable,
-                'product': papel.id,
-                'unit': papel.sale_uom,
-                'unit_price': papel.list_price,
-                'description': 'Pliegos Demasia Variable',
-                'fijo': False,
-                'id_interior': self.interior.id_wizard_start,
-                }
+            'sale': t.context.get('active_id'),
+            'sequence': 0,
+            'type': 'line',
+            'quantity': demasia_variable,
+            'product': papel.id,
+            'unit': papel.sale_uom,
+            'unit_price': papel.list_price,
+            'description': 'Pliegos Demasia Variable',
+            'fijo': False,
+            'id_interior': self.interior.id_wizard_start,
+            }
         SaleLine.create([sale_line])
 
         # Tiempo de impresión en maquina.
@@ -199,8 +196,8 @@ class utils():
         # Creamos línea de Tinta
         ## Formula:
         cantidad_tinta = Decimal(self.interior.producto_papel.ancho_pliego / 100) * Decimal(self.interior.producto_papel.alto_pliego / 100) * \
-                        Decimal(self.interior.producto_papel.cantidad_de_pliegos + demasia_variable + demasia_fija) * Decimal(cantidad_pasadas) * \
-                        Decimal(self.interior.tinta.rendimiento_tinta) / 1000 * Decimal(self.interior.tinta_superficie_cubierta / 100.0)
+            Decimal(self.interior.producto_papel.cantidad_de_pliegos + demasia_variable + demasia_fija) * Decimal(cantidad_pasadas) * \
+            Decimal(self.interior.tinta.rendimiento_tinta) / 1000 * Decimal(self.interior.tinta_superficie_cubierta / 100.0)
 
         ## ancho_pliego(metros) * alto_pliego(metros) -> area de pliego *
         ## cantidad_de_pliegos * rendimiento_tinta (gramos/m2) / 1000 *
@@ -268,30 +265,26 @@ class utils():
             description = 'Laminado (material)'
             fijo = False
             self._save_sale_line(SaleLine, t, material_laminado, cantidad_material_laminado, description, fijo)
-
             # Proceso:(Largo del pliego (en metros) x cantidad de pliegos / velocidad de maquina + tiempo de arreglo (en horas))*valor de la hora
             # Proceso: (0,604 mts x 250 / 300 mts x hs + 0,5 hs) x 250$
             cantidad_proceso = Decimal(self.interior.producto_papel.alto_pliego / 100) * Decimal(self.interior.producto_papel.cantidad_de_pliegos) / Decimal(self.interior.laminado.velocidad_maq) \
                       + Decimal(self.interior.laminado.tiempo_arreglo)
-
             description = 'Laminado (proceso)'
             fijo = False
             self._save_sale_line(SaleLine, t, self.interior.laminado, cantidad_proceso.quantize(Decimal('.01')), description, fijo)
-
         return res
 
     def _save_sale_line(self, SaleLine, t, producto, quantity, description, fijo):
-
-            sale_line = {
-                    'sale': t.context.get('active_id'),
-                    'sequence': 0,
-                    'type': 'line',
-                    'quantity': quantity,
-                    'product': producto,
-                    'unit': producto.sale_uom,
-                    'unit_price': producto.list_price,
-                    'description': description,
-                    'fijo': fijo,
-                    'id_interior': self.interior.id_wizard_start,
-                    }
-            SaleLine.create([sale_line])
+        sale_line = {
+                'sale': t.context.get('active_id'),
+                'sequence': 0,
+                'type': 'line',
+                'quantity': quantity,
+                'product': producto,
+                'unit': producto.sale_uom,
+                'unit_price': producto.list_price,
+                'description': description,
+                'fijo': fijo,
+                'id_interior': self.interior.id_wizard_start,
+                }
+        SaleLine.create([sale_line])

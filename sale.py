@@ -1,6 +1,6 @@
-#This file is part of the sale_printery_budget module for Tryton.
-#The COPYRIGHT file at the top level of this repository contains
-#the full copyright notices and license terms.
+# This file is part of the sale_printery_budget module for Tryton.
+# The COPYRIGHT file at the top level of this repository contains
+# the full copyright notices and license terms.
 
 from .utils import *
 from decimal import Decimal
@@ -28,21 +28,22 @@ ORIENTACION = [
     ('frente_dorso', 'Frente/Dorso'),
 ]
 
+
 class OtraCantidad(ModelSQL, ModelView):
     "Otra Cantidad"
     __name__ = 'sale_printery_budget.otra_cantidad'
 
     name = fields.Function(fields.Char('Name', size=None, translate=False),
-                           'get_name')
+        'get_name')
     cantidad = fields.Integer('Cantidad', required=True)
     utilidad = fields.Integer('Porcentaje de Utilidad (%)', required=True)
     sale_id = fields.Many2One('sale.sale', 'Venta')
     total = fields.Function(fields.Numeric('Total', digits=(16, 2)),
-                            'get_total_amount')
+        'get_total_amount')
     contribucion_marginal = fields.Function(fields.Numeric('Contribucion \
-                                                           marginal (%)',
-                                                           digits=(16, 2)),
-                                            'get_contribucion_marginal')
+        marginal (%)',
+            digits=(16, 2)),
+        'get_contribucion_marginal')
 
     @staticmethod
     def default_utilidad():
@@ -97,23 +98,23 @@ class OtraCantidad(ModelSQL, ModelView):
         for otra_cantidad in cls.browse(otras_cantidades):
             sale = otra_cantidad.sale_id
             res[otra_cantidad.id] = cls.calcular_total(sale,
-                                                       otra_cantidad.cantidad,
-                                                       otra_cantidad.utilidad)
+                otra_cantidad.cantidad,
+                otra_cantidad.utilidad)
         return res
 
     @classmethod
     def _calcular_gastos(self, sale, cantidad, filtro):
 
         gasto_fijo = sum((line.amount
-                          for line in sale.lines
-                          if (line.type == 'line'
-                              and filtro(line)
-                              and line.fijo)), Decimal(0))
+                for line in sale.lines
+                if (line.type == 'line'
+                    and filtro(line)
+                    and line.fijo)), Decimal(0))
         gasto_variable = sum((line.amount
-                              for line in sale.lines
-                              if (line.type == 'line'
-                                  and filtro(line)
-                                  and not line.fijo)), Decimal(0))
+                for line in sale.lines
+                if (line.type == 'line'
+                    and filtro(line)
+                    and not line.fijo)), Decimal(0))
 
         escala = Decimal(float(cantidad) / sale.cantidad)
 
@@ -128,24 +129,20 @@ class OtraCantidad(ModelSQL, ModelView):
 
 class Sale(metaclass=PoolMeta):
     __name__ = 'sale.sale'
-
     cantidad = fields.Integer('Cantidad', required=True,
-                states={
-                    'readonly': Eval('state') != 'draft',
-                }, depends=['state'])
-
+        states={
+            'readonly': Eval('state') != 'draft',
+            }, depends=['state'])
     otra_cantidad = fields.One2Many('sale_printery_budget.otra_cantidad',
-                    'sale_id',
-                    'Otra Cantidad',
-                    states={
-                        'readonly': Eval('state') != 'draft',
-                    }, depends=['state'])
-
+        'sale_id',
+        'Otra Cantidad',
+        states={
+            'readonly': Eval('state') != 'draft',
+            }, depends=['state'])
     orden_trabajo = fields.One2Many('sale_printery_budget.orden_trabajo',
         'sale', 'Orden Trabajo', states={
             'readonly': Eval('state') != 'draft',
             }, depends=['state'])
-
     cantidad_confirmada = fields.Many2One('sale_printery_budget.otra_cantidad',
         'Cantidad Confirmada', domain=[
             ('sale_id', '=', Eval('id', None)),
@@ -158,16 +155,15 @@ class Sale(metaclass=PoolMeta):
             'readonly': Eval('state') != 'quotation',
             'required': ~Eval('state').in_(['draft', 'quotation', 'cancel', 'expired']),
             }, depends=['id', 'state'])
-
     state = fields.Selection([
-        ('draft', 'Draft'),
-        ('quotation', 'Quotation'),
-        ('confirmed', 'Confirmed'),
-        ('processing', 'Processing'),
-        ('done', 'Done'),
-        ('cancel', 'Canceled'),
-        ('expired', 'Vencida'),
-    ], 'State', readonly=True, required=True)
+            ('draft', 'Draft'),
+            ('quotation', 'Quotation'),
+            ('confirmed', 'Confirmed'),
+            ('processing', 'Processing'),
+            ('done', 'Done'),
+            ('cancel', 'Canceled'),
+            ('expired', 'Vencida'),
+            ], 'State', readonly=True, required=True)
     sale_date = fields.Date('Sale Date',
         states={
             'readonly': ~Eval('state').in_(['draft', 'quotation']),
@@ -179,9 +175,9 @@ class Sale(metaclass=PoolMeta):
     def __setup__(cls):
         super(Sale, cls).__setup__()
         cls._error_messages.update({
-            'miss_cantidad': 'Se debe setear la cantidad confirmada!',
-            'miss_otras_cantidades': 'Se debe agregar al menos una cantidad en "Otras cantidades"',
-        })
+                'miss_cantidad': 'Se debe setear la cantidad confirmada!',
+                'miss_otras_cantidades': 'Se debe agregar al menos una cantidad en "Otras cantidades"',
+                })
         cls._buttons.update({
                 'calcular_papel': {
                     'invisible': ~Eval('state').in_(['draft']),
@@ -189,7 +185,7 @@ class Sale(metaclass=PoolMeta):
                 'retomar_calcular_papel': {
                     'invisible': ~Eval('state').in_(['draft']),
                     },
-        })
+                })
 
     @classmethod
     def vencimiento_trigger(self):
@@ -250,16 +246,16 @@ class Sale(metaclass=PoolMeta):
                                     'utilidad')])[0]
             # Agregar línea utilidad
             sale_line = {
-                    'sale': sale.id,
-                    'sequence': 10,
-                    'product': utilidad_producto.id,
-                    'type': 'line',
-                    'quantity': 1,
-                    'unit': Uom.search_read([('id', '=', Id('product', 'uom_unit').pyson())],fields_names=['id'])[0]['id'],
-                    'unit_price': Decimal(OtraCantidad._calcular_gastos(sale, cantidad_confirmada, lambda x: True) * utilidad / 100).quantize(Decimal('.01')),
-                    'description': 'Utilidad (%d %%)' % utilidad,
-                    'fijo': True,
-                    }
+                'sale': sale.id,
+                'sequence': 10,
+                'product': utilidad_producto.id,
+                'type': 'line',
+                'quantity': 1,
+                'unit': Uom.search_read([('id', '=', Id('product', 'uom_unit').pyson())],fields_names=['id'])[0]['id'],
+                'unit_price': Decimal(OtraCantidad._calcular_gastos(sale, cantidad_confirmada, lambda x: True) * utilidad / 100).quantize(Decimal('.01')),
+                'description': 'Utilidad (%d %%)' % utilidad,
+                'fijo': True,
+                }
             SaleLine.create([sale_line])
 
         # Actualizamos las lineas
@@ -332,40 +328,38 @@ class SaleLine(metaclass=PoolMeta):
     __name__ = 'sale.line'
 
     fijo = fields.Boolean('Fijo',
-                          states={'invisible': Eval('type') != 'line'},
-                          depends=['type'])
+        states={'invisible': Eval('type') != 'line'},
+        depends=['type'])
     id_interior = fields.Char('id interior')
 
 
 class CalcularPapelProducto(ModelSQL, ModelView):
     "Wizard Producto"
     __name__ = 'sale_printery_budget.calcular_papel.producto'
-
     name = fields.Char('Papel', size=None, translate=True,
-                       select=True)
+        select=True)
     producto = fields.Many2One('product.product', 'Producto',
-                               select=True)
+        select=True)
     orientacion_papel = fields.Selection([
-        ('H', 'Horizontal'),
-        ('V', 'Vertical'),
-    ], 'Orientación Papel')
-
+            ('H', 'Horizontal'),
+            ('V', 'Vertical'),
+            ], 'Orientación Papel')
     orientacion_trabajo = fields.Selection([
-        ('H', 'Horizontal'),
-        ('V', 'Vertical'),
-    ], 'Orientación Trabajo')
+            ('H', 'Horizontal'),
+            ('V', 'Vertical'),
+            ], 'Orientación Trabajo')
     ancho_pliego = fields.Float('Ancho Pliego', digits=(16, 2))
     alto_pliego = fields.Float('Alto Pliego', digits=(16, 2))
     pliegos_por_hoja = fields.Integer('Pliegos por Hoja')
     cantidad_de_pliegos = fields.Integer('Cantidad de Pliegos')
     trabajos_por_pliego = fields.Char('Trabajos por Pliego')
-
     cantidad_hojas = fields.Integer('Cantidad de Hojas')
     desperdicio = fields.Numeric('Desperdicio (%)', digits=(3, 0))
     # Auxiliar para filtrar los productos
     id_wizard = fields.Char('id del wizard')
     producto_id = fields.Integer('ID del producto')
     sale_id = fields.Integer('sale_id')
+
 
 class CalcularPapelElegirInterior(ModelView):
     "Wizard Start"
@@ -388,12 +382,12 @@ class CalcularPapelWizard(ModelView):
         ('cuaderno', 'Cuaderno'),
     ], 'Categoria', required=True)
     altura = fields.Numeric('Altura', digits=(16, 2),
-                            required=True)
+        required=True)
     ancho = fields.Numeric('Ancho', digits=(16, 2),
-                           required=True)
+        required=True)
     es_tapa = fields.Boolean('¿Es tapa?', states={
-        'invisible': Eval('categoria').in_(['folleto']),
-    }, select=False,
+            'invisible': Eval('categoria').in_(['folleto']),
+            }, select=False,
         depends=['categoria'])
     sin_pinza = fields.Boolean('Sin Pinza', select=False)
     id_wizard_start = fields.Char('id de wizard', states={'invisible': True})
@@ -403,48 +397,48 @@ class CalcularPapelWizard(ModelView):
     calle_horizontal = fields.Numeric('Calle Horizontal', digits=(16, 2), required=True)
     calle_vertical = fields.Numeric('Calle Vertical', digits=(16, 2), required=True)
     tipo_papel = fields.Many2One('product.category', 'Tipo de papel',
-                                 domain=[('parent', '=', Id('sale_printery_budget',
-                                                            'cat_papel'))],
-                                 required=True)
+        domain=[('parent', '=', Id('sale_printery_budget',
+                    'cat_papel'))],
+        required=True)
     gramaje = fields.Numeric('Gramaje', digits=(16, 2), required=True)
     solapa = fields.Numeric('Solapa', digits=(16, 2), states={
-        'invisible': Eval('categoria').in_(['folleto']),
-    }, required=False,
+            'invisible': Eval('categoria').in_(['folleto']),
+            }, required=False,
         depends=['categoria'])
     lomo = fields.Numeric('Lomo', digits=(16, 2), states={
-        'invisible': Not(Bool(Eval('es_tapa')))
-    }, required=False,
+            'invisible': Not(Bool(Eval('es_tapa')))
+            }, required=False,
         depends=['es_tapa'])
     cantidad_paginas = fields.Integer('Cantidad de Paginas', states={
-        'invisible': Eval('categoria').in_(['folleto']),
-    }, required=False,
+            'invisible': Eval('categoria').in_(['folleto']),
+            }, required=False,
         depends=['categoria'])
     # Datos superficiales
     colores_frente = fields.Integer('Colores Frente', required=True)
     colores_dorso = fields.Integer('Colores Dorso', required=True)
     doblado = fields.Many2One('product.product', 'Doblado',
-                                        domain=[('template.product_type_printery', '=', 'maquina_doblado')],
-                                        required=False)
+        domain=[('template.product_type_printery', '=', 'maquina_doblado')],
+        required=False)
     encuadernado = fields.Many2One('product.product', 'Encuadernado',
-                                     domain=[('template.product_type_printery', '=', 'maquina_encuadernacion')],
-                                     required=False,
-                                     depends=['categoria'],
-                                     states={
-                                         'invisible': Eval('categoria').in_(['folleto']),
-                                     })
+        domain=[('template.product_type_printery', '=', 'maquina_encuadernacion')],
+        required=False,
+        depends=['categoria'],
+        states={
+            'invisible': Eval('categoria').in_(['folleto']),
+            })
     cantidad_broches = fields.Integer('Cantidad de Broches', states={
-        'invisible': Eval('categoria').in_(['folleto']),
-        'required': Bool(Eval('encuadernado')),
-    }, depends=['categoria', 'encuadernado'])
+            'invisible': Eval('categoria').in_(['folleto']),
+            'required': Bool(Eval('encuadernado')),
+            }, depends=['categoria', 'encuadernado'])
     laminado = fields.Many2One('product.product', 'Laminado',
-                                        domain=[('template.product_type_printery', '=', 'maquina_laminado')],
-                                        required=False)
+        domain=[('template.product_type_printery', '=', 'maquina_laminado')],
+        required=False)
     laminado_orientacion = fields.Selection(ORIENTACION, 'Laminado Orientacion', states={
-        'required': Bool(Eval('laminado')),
-    }, depends=['laminado'])
+            'required': Bool(Eval('laminado')),
+            }, depends=['laminado'])
     maquina = fields.Many2One('product.product', 'Máquina',
-                              domain=[('template.product_type_printery', '=', 'maquina')],
-                              required=True)
+        domain=[('template.product_type_printery', '=', 'maquina')],
+        required=True)
     producto_papel = fields.Many2One('sale_printery_budget.calcular_papel.producto',
         'Papel', states={
             'readonly': False,
@@ -454,24 +448,32 @@ class CalcularPapelWizard(ModelView):
     demasia_variable = fields.Integer('Demasia Variable(%)', required=True)
     demasia_fija = fields.Integer('Demasia Fija', required=True)
     tinta = fields.Many2One('product.product', 'Tinta',
-                              domain=[('template.product_type_printery', '=', 'tinta')],
-                              required=True)
+        domain=[('template.product_type_printery', '=', 'tinta')],
+        required=True)
     tinta_superficie_cubierta = fields.Integer('Tinta (superficie Cubierta(%))', required=True)
     velocidad_maquina = fields.Selection([
-        ('tiempo_rapido', 'Tiempo Rápido'),
-        ('tiempo_medio', 'Tiempo Medio'),
-        ('tiempo_lento', 'Tiempo Lento'),
-    ], 'Velocidad Maquina', required=True)
-    # Campos readonly
-    trabajos_por_pliego = fields.Char('Trabajos por Pliego', states={'readonly': True})
-    formato_pliego = fields.Char('Formato Pliego', states={'readonly': True})
-    cantidad_planchas = fields.Integer('Cantidad Planchas', states={'readonly': True})
-    plancha_adicional = fields.Integer('Plancha Adicional', states={'readonly': False}, required=True)
-    pliegos_netos = fields.Integer('Pliegos Netos', states={'readonly': True})
-    postura_trabajo = fields.Selection([('H', 'Horizontal'),('V', 'Vertical')],
-                               'Postura Trabajo', states={'readonly': True})
-    postura_papel = fields.Selection([('H', 'Horizontal'),('V', 'Vertical')],
-                               'Postura Papel', states={'readonly': True})
+            ('tiempo_rapido', 'Tiempo Rápido'),
+            ('tiempo_medio', 'Tiempo Medio'),
+            ('tiempo_lento', 'Tiempo Lento'),
+            ], 'Velocidad Maquina', required=True)
+    trabajos_por_pliego = fields.Char('Trabajos por Pliego',
+        states={'readonly': True})
+    formato_pliego = fields.Char('Formato Pliego',
+        states={'readonly': True})
+    cantidad_planchas = fields.Integer('Cantidad Planchas',
+        states={'readonly': True})
+    plancha_adicional = fields.Integer('Plancha Adicional',
+        states={'readonly': False}, required=True)
+    pliegos_netos = fields.Integer('Pliegos Netos',
+        states={'readonly': True})
+    postura_trabajo = fields.Selection([
+            ('H', 'Horizontal'),
+            ('V', 'Vertical')],
+        'Postura Trabajo', states={'readonly': True})
+    postura_papel = fields.Selection([
+            ('H', 'Horizontal'),
+            ('V', 'Vertical')],
+        'Postura Papel', states={'readonly': True})
     @classmethod
     def __setup__(cls):
         super(CalcularPapelWizard, cls).__setup__()
@@ -532,7 +534,6 @@ class CalcularPapelWizard(ModelView):
         try:
             if self.maquina.demasia_fija:
                 self.demasia_fija = self.maquina.demasia_fija
-
             if self.maquina.demasia_variable:
                 self.demasia_variable = self.maquina.demasia_variable
         except:
@@ -805,11 +806,11 @@ class CalcularPapel(Wizard):
     __name__ = 'sale_printery_budget.calcular_papel'
     start_state = 'interior'
     interior = StateView('sale_printery_budget.calcular_papel.wizard',
-                                 'sale_printery_budget.calcular_papel_interior_view_form', [
-                                     Button('Cancelar', 'end', 'tryton-cancel'),
-                                     Button('Siguiente Interior', 'interior', 'tryton-go-next'),
-                                     Button('Terminar', 'terminar', 'tryton-ok', True),
-                                 ])
+        'sale_printery_budget.calcular_papel_interior_view_form', [
+            Button('Cancelar', 'end', 'tryton-cancel'),
+            Button('Siguiente Interior', 'interior', 'tryton-go-next'),
+            Button('Terminar', 'terminar', 'tryton-ok', True),
+            ])
 
     terminar = StateTransition()
 
@@ -887,15 +888,15 @@ class RetomarCalcularPapel(Wizard):
     start_state = 'elegir_interior'
 
     elegir_interior = StateView('sale_printery_budget.calcular_papel.elegir_interior',
-                                 'sale_printery_budget.calcular_papel_elegir_interior_view_form', [
-                                     Button('Cancelar', 'end', 'tryton-cancel'),
-                                     Button('Siguiente', 'interior', 'tryton-go-next', True),
-                                 ])
+        'sale_printery_budget.calcular_papel_elegir_interior_view_form', [
+            Button('Cancelar', 'end', 'tryton-cancel'),
+            Button('Siguiente', 'interior', 'tryton-go-next', True),
+            ])
     interior = StateView('sale_printery_budget.calcular_papel.wizard',
-                                 'sale_printery_budget.calcular_papel_interior_view_form', [
-                                     Button('Cancelar', 'end', 'tryton-cancel'),
-                                     Button('Terminar', 'terminar', 'tryton-ok', True),
-                                 ])
+        'sale_printery_budget.calcular_papel_interior_view_form', [
+            Button('Cancelar', 'end', 'tryton-cancel'),
+            Button('Terminar', 'terminar', 'tryton-ok', True),
+            ])
 
     terminar = StateTransition()
 
@@ -921,32 +922,32 @@ class RetomarCalcularPapel(Wizard):
 
         # Copiar la orden de trabajo en modelo interior
         res = {
-                'cantidad': interior.cantidad,
-                'sale_id': interior.sale.id,
-                'calle_horizontal': interior.calle_horizontal,
-                'calle_vertical': interior.calle_vertical,
-                'cantidad': interior.cantidad,
-                'colores_frente': interior.colores_frente,
-                'colores_dorso': interior.colores_dorso,
-                'es_tapa': interior.es_tapa,
-                'tipo_papel': interior.tipo_papel.id,
-                'sin_pinza': interior.sin_pinza,
-                'formato_pliego': interior.formato_pliego,
-                'categoria': interior.categoria,
-                'ancho': interior.ancho,
-                'altura': interior.altura,
-                'postura_papel': interior.postura_papel,
-                'postura_trabajo': interior.postura_trabajo,
-                #'maquina': interior.maquina.id,
-                'tinta_superficie_cubierta': interior.tinta_superficie_cubierta,
-                'tinta': interior.tinta.id,
-                'solapa': interior.solapa,
-                'lomo': interior.lomo,
-                'gramaje': interior.gramaje,
-                'id_wizard_start': interior.id_interior,
-                'velocidad_maquina': interior.velocidad_maquina,
-                'plancha_adicional': 0,
-                'cantidad_paginas': interior.cantidad_paginas,
+            'cantidad': interior.cantidad,
+            'sale_id': interior.sale.id,
+            'calle_horizontal': interior.calle_horizontal,
+            'calle_vertical': interior.calle_vertical,
+            'cantidad': interior.cantidad,
+            'colores_frente': interior.colores_frente,
+            'colores_dorso': interior.colores_dorso,
+            'es_tapa': interior.es_tapa,
+            'tipo_papel': interior.tipo_papel.id,
+            'sin_pinza': interior.sin_pinza,
+            'formato_pliego': interior.formato_pliego,
+            'categoria': interior.categoria,
+            'ancho': interior.ancho,
+            'altura': interior.altura,
+            'postura_papel': interior.postura_papel,
+            'postura_trabajo': interior.postura_trabajo,
+            #'maquina': interior.maquina.id,
+            'tinta_superficie_cubierta': interior.tinta_superficie_cubierta,
+            'tinta': interior.tinta.id,
+            'solapa': interior.solapa,
+            'lomo': interior.lomo,
+            'gramaje': interior.gramaje,
+            'id_wizard_start': interior.id_interior,
+            'velocidad_maquina': interior.velocidad_maquina,
+            'plancha_adicional': 0,
+            'cantidad_paginas': interior.cantidad_paginas,
             }
 
         if hasattr(interior, 'doblado') != False and interior.doblado is not None:
