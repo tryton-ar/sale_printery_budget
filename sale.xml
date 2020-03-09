@@ -93,7 +93,7 @@
            <field name="name">Presupuesto al Cliente</field>
            <field name="report_name">sale_printery_budget.presupuesto_cliente</field>
            <field name="model">sale.sale</field>
-           <field name="report">sale_printery_budget/presupuesto_cliente.odt</field>
+           <field name="report">sale_printery_budget/presupuesto_cliente.fodt</field>
            <field name="template_extension">odt</field>
        </record>
 
@@ -101,6 +101,26 @@
             <field name="keyword">form_print</field>
             <field name="model">sale.sale,-1</field>
             <field name="action" ref="report_sale_printery_budget"/>
+        </record>
+
+        <record model="ir.model.button" id="sale_calcular_papel_button">
+            <field name="name">calcular_papel</field>
+            <field name="string">Calcular Papel</field>
+            <field name="model" search="[('model', '=', 'sale.sale')]"/>
+        </record>
+        <record model="ir.model.button-res.group" id="sale_calcular_papel_button_group_sale">
+            <field name="button" ref="sale_calcular_papel_button"/>
+            <field name="group" ref="sale.group_sale"/>
+        </record>
+
+        <record model="ir.model.button" id="sale_retomar_calcular_papel_button">
+            <field name="name">retomar_calcular_papel</field>
+            <field name="string">Calcular Papel</field>
+            <field name="model" search="[('model', '=', 'sale.sale')]"/>
+        </record>
+        <record model="ir.model.button-res.group" id="sale_retomar_calcular_papel_button_group_sale">
+            <field name="button" ref="sale_retomar_calcular_papel_button"/>
+            <field name="group" ref="sale.group_sale"/>
         </record>
     </data>
 </tryton>

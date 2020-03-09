@@ -4,6 +4,20 @@ The COPYRIGHT file at the top level of this repository contains
 the full copyright notices and license terms. -->
 <tryton>
     <data>
+        <record model="res.group" id="group_trabajo">
+            <field name="name">Ordenes de Trabajo</field>
+        </record>
+        <record model="res.group" id="group_trabajo_admin">
+            <field name="name">Ordenes de Trabajo Administrator</field>
+        </record>
+        <record model="res.user-res.group" id="user_admin_group_trabajo">
+            <field name="user" ref="res.user_admin"/>
+            <field name="group" ref="group_trabajo"/>
+        </record>
+        <record model="res.user-res.group" id="user_admin_group_trabajo_admin">
+            <field name="user" ref="res.user_admin"/>
+            <field name="group" ref="group_trabajo_admin"/>
+        </record>
         <record model="ir.ui.view" id="trabajo_view_form">
             <field name="model">sale_printery_budget.orden_trabajo</field>
             <field name="type">form</field>
@@ -34,7 +48,7 @@ the full copyright notices and license terms. -->
            <field name="name">Orden de trabajo</field>
            <field name="model">sale_printery_budget.orden_trabajo</field>
            <field name="report_name">sale_printery_budget.orden_trabajo</field>
-           <field name="report">sale_printery_budget/trabajo.odt</field>
+           <field name="report">sale_printery_budget/trabajo.fodt</field>
        </record>
 
         <record model="ir.action.keyword" id="report_orden_trabajo_keyword">
@@ -43,7 +57,82 @@ the full copyright notices and license terms. -->
             <field name="action" ref="report_orden_trabajo"/>
         </record>
 
-        <menuitem name="Ordenes de Trabajo" sequence="0" id="menu_trabajo" />
-        <menuitem id="menu_sale_printery_budget_trabajo" parent="menu_trabajo" action="act_trabajo_form" icon="tryton-list"/>
+        <record model="ir.model.access" id="access_trabajo">
+            <field name="model" search="[('model', '=', 'sale_printery_budget.orden_trabajo')]"/>
+            <field name="perm_read" eval="False"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_delete" eval="False"/>
+        </record>
+        <record model="ir.model.access" id="access_trabajo_trabajo">
+            <field name="model" search="[('model', '=', 'sale_printery_budget.orden_trabajo')]"/>
+            <field name="group" ref="group_trabajo"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="True"/>
+            <field name="perm_create" eval="True"/>
+            <field name="perm_delete" eval="True"/>
+        </record>
+
+        <!-- buttons -->
+        <record model="ir.model.button" id="trabajo_cancel_button">
+            <field name="name">cancel</field>
+            <field name="string">Cancel</field>
+            <field name="model" search="[('model', '=', 'sale_printery_budget.orden_trabajo')]"/>
+        </record>
+        <record model="ir.model.button-res.group" id="trabajo_cancel_button_group_trabajo">
+            <field name="button" ref="trabajo_cancel_button"/>
+            <field name="group" ref="group_trabajo"/>
+        </record>
+
+        <record model="ir.model.button" id="trabajo_draft_button">
+            <field name="name">draft</field>
+            <field name="string">Draft</field>
+            <field name="model" search="[('model', '=', 'sale_printery_budget.orden_trabajo')]"/>
+        </record>
+        <record model="ir.model.button-res.group" id="trabajo_draft_button_group_trabajo">
+            <field name="button" ref="trabajo_draft_button"/>
+            <field name="group" ref="group_trabajo"/>
+        </record>
+
+        <record model="ir.model.button" id="trabajo_confirmed_button">
+            <field name="name">confirmed</field>
+            <field name="string">Confirmed</field>
+            <field name="model" search="[('model', '=', 'sale_printery_budget.orden_trabajo')]"/>
+        </record>
+        <record model="ir.model.button-res.group" id="trabajo_confirmed_button_group_trabajo">
+            <field name="button" ref="trabajo_confirmed_button"/>
+            <field name="group" ref="group_trabajo"/>
+        </record>
+
+        <record model="ir.model.button" id="trabajo_done_button">
+            <field name="name">done</field>
+            <field name="string">Done</field>
+            <field name="model" search="[('model', '=', 'sale_printery_budget.orden_trabajo')]"/>
+        </record>
+        <record model="ir.model.button-res.group" id="trabajo_done_button_group_trabajo">
+            <field name="button" ref="trabajo_done_button"/>
+            <field name="group" ref="group_trabajo"/>
+        </record>
+
+        <record model="ir.model.button" id="trabajo_process_button">
+            <field name="name">process</field>
+            <field name="string">Process</field>
+            <field name="model" search="[('model', '=', 'sale_printery_budget.orden_trabajo')]"/>
+        </record>
+        <record model="ir.model.button-res.group" id="trabajo_process_button_group_trabajo">
+            <field name="button" ref="trabajo_process_button"/>
+            <field name="group" ref="group_trabajo"/>
+        </record>
+
+        <menuitem name="Ordenes de Trabajo" sequence="0" id="menu_trabajo" icon="tryton-folder"/>
+        <record model="ir.ui.menu-res.group" id="menu_trabajo_group_trabajo">
+            <field name="menu" ref="menu_trabajo"/>
+            <field name="group" ref="group_trabajo"/>
+        </record>
+        <menuitem id="menu_sale_printery_budget_trabajo" parent="menu_trabajo" action="act_trabajo_form"/>
+        <record model="ir.ui.menu-res.group" id="menu_sale_printery_budget_trabajo_group_trabajo">
+            <field name="menu" ref="menu_sale_printery_budget_trabajo"/>
+            <field name="group" ref="group_trabajo"/>
+        </record>
     </data>
 </tryton>

@@ -1,9 +1,8 @@
-# coding=utf-8
 #This file is part of the sale_printery_budget module for Tryton.
 #The COPYRIGHT file at the top level of this repository contains
 #the full copyright notices and license terms.
 
-from utils import *
+from .utils import *
 from decimal import Decimal
 import datetime
 import uuid
@@ -127,8 +126,7 @@ class OtraCantidad(ModelSQL, ModelView):
         return Currency.round(sale.currency, gastos * (100 + utilidad) / 100)
 
 
-class Sale:
-    __metaclass__ = PoolMeta
+class Sale(metaclass=PoolMeta):
     __name__ = 'sale.sale'
 
     cantidad = fields.Integer('Cantidad', required=True,
@@ -144,20 +142,22 @@ class Sale:
                     }, depends=['state'])
 
     orden_trabajo = fields.One2Many('sale_printery_budget.orden_trabajo',
-                    'sale',
-                    'Orden Trabajo',
-                    states={
-                        'readonly': Eval('state') != 'draft',
-                    }, depends=['state'])
+        'sale', 'Orden Trabajo', states={
+            'readonly': Eval('state') != 'draft',
+            }, depends=['state'])
 
     cantidad_confirmada = fields.Many2One('sale_printery_budget.otra_cantidad',
-                            'Cantidad Confirmada',
-                            domain=[('sale_id', '=', Eval('active_id', -1))],
-                            states={
-                                'invisible': Eval('state').in_(['draft', 'cancel']),
-                                'readonly': Eval('state') != 'quotation',
-                                'required': ~Eval('state').in_(['draft', 'quotation', 'cancel', 'expired']),
-                            })
+        'Cantidad Confirmada', domain=[
+            ('sale_id', '=', Eval('id', None)),
+            ],
+        context={
+            'sale_id': Eval('id', None),
+            },
+        states={
+            'invisible': Eval('state').in_(['draft', 'cancel']),
+            'readonly': Eval('state') != 'quotation',
+            'required': ~Eval('state').in_(['draft', 'quotation', 'cancel', 'expired']),
+            }, depends=['id', 'state'])
 
     state = fields.Selection([
         ('draft', 'Draft'),
@@ -328,8 +328,7 @@ class PresupuestoClienteReport(Report):
         return report_context
 
 
-class SaleLine:
-    __metaclass__ = PoolMeta
+class SaleLine(metaclass=PoolMeta):
     __name__ = 'sale.line'
 
     fijo = fields.Boolean('Fijo',
@@ -349,12 +348,12 @@ class CalcularPapelProducto(ModelSQL, ModelView):
     orientacion_papel = fields.Selection([
         ('H', 'Horizontal'),
         ('V', 'Vertical'),
-    ], u'Orientación Papel')
+    ], 'Orientación Papel')
 
     orientacion_trabajo = fields.Selection([
         ('H', 'Horizontal'),
         ('V', 'Vertical'),
-    ], u'Orientación Trabajo')
+    ], 'Orientación Trabajo')
     ancho_pliego = fields.Float('Ancho Pliego', digits=(16, 2))
     alto_pliego = fields.Float('Alto Pliego', digits=(16, 2))
     pliegos_por_hoja = fields.Integer('Pliegos por Hoja')
@@ -374,9 +373,9 @@ class CalcularPapelElegirInterior(ModelView):
 
     sale_id = fields.Integer('sale_id', readonly=True)
     orden_trabajo = fields.Many2One('sale_printery_budget.orden_trabajo',
-                                    'Orden de Trabajo',
-                                    domain=[('sale', '=', Eval('sale_id'))],
-                                    required=True)
+        'Orden de Trabajo', domain=[
+            ('sale', '=', Eval('sale_id')),
+            ], depends=['sale_id'], required=True)
 
 
 class CalcularPapelWizard(ModelView):
@@ -392,18 +391,18 @@ class CalcularPapelWizard(ModelView):
                             required=True)
     ancho = fields.Numeric('Ancho', digits=(16, 2),
                            required=True)
-    es_tapa = fields.Boolean(u'¿Es tapa?', states={
+    es_tapa = fields.Boolean('¿Es tapa?', states={
         'invisible': Eval('categoria').in_(['folleto']),
     }, select=False,
         depends=['categoria'])
-    sin_pinza = fields.Boolean(u'Sin Pinza', select=False)
+    sin_pinza = fields.Boolean('Sin Pinza', select=False)
     id_wizard_start = fields.Char('id de wizard', states={'invisible': True})
     sale_id = fields.Integer('sale_id', states={'invisible': True})
     producto_id = fields.Integer('id de producto', states={'invisible': True})
     cantidad = fields.Integer('Cantidad', required=True, states={'invisible': False})
-    calle_horizontal = fields.Numeric(u'Calle Horizontal', digits=(16, 2), required=True)
-    calle_vertical = fields.Numeric(u'Calle Vertical', digits=(16, 2), required=True)
-    tipo_papel = fields.Many2One('product.category', u'Tipo de papel',
+    calle_horizontal = fields.Numeric('Calle Horizontal', digits=(16, 2), required=True)
+    calle_vertical = fields.Numeric('Calle Vertical', digits=(16, 2), required=True)
+    tipo_papel = fields.Many2One('product.category', 'Tipo de papel',
                                  domain=[('parent', '=', Id('sale_printery_budget',
                                                             'cat_papel'))],
                                  required=True)
@@ -416,17 +415,17 @@ class CalcularPapelWizard(ModelView):
         'invisible': Not(Bool(Eval('es_tapa')))
     }, required=False,
         depends=['es_tapa'])
-    cantidad_paginas = fields.Integer(u'Cantidad de Paginas', states={
+    cantidad_paginas = fields.Integer('Cantidad de Paginas', states={
         'invisible': Eval('categoria').in_(['folleto']),
     }, required=False,
         depends=['categoria'])
     # Datos superficiales
-    colores_frente = fields.Integer(u'Colores Frente', required=True)
-    colores_dorso = fields.Integer(u'Colores Dorso', required=True)
-    doblado = fields.Many2One('product.product', u'Doblado',
+    colores_frente = fields.Integer('Colores Frente', required=True)
+    colores_dorso = fields.Integer('Colores Dorso', required=True)
+    doblado = fields.Many2One('product.product', 'Doblado',
                                         domain=[('template.product_type_printery', '=', 'maquina_doblado')],
                                         required=False)
-    encuadernado = fields.Many2One('product.product', u'Encuadernado',
+    encuadernado = fields.Many2One('product.product', 'Encuadernado',
                                      domain=[('template.product_type_printery', '=', 'maquina_encuadernacion')],
                                      required=False,
                                      depends=['categoria'],
@@ -437,30 +436,31 @@ class CalcularPapelWizard(ModelView):
         'invisible': Eval('categoria').in_(['folleto']),
         'required': Bool(Eval('encuadernado')),
     }, depends=['categoria', 'encuadernado'])
-    laminado = fields.Many2One('product.product', u'Laminado',
+    laminado = fields.Many2One('product.product', 'Laminado',
                                         domain=[('template.product_type_printery', '=', 'maquina_laminado')],
                                         required=False)
     laminado_orientacion = fields.Selection(ORIENTACION, 'Laminado Orientacion', states={
         'required': Bool(Eval('laminado')),
     }, depends=['laminado'])
-    maquina = fields.Many2One('product.product', u'Máquina',
+    maquina = fields.Many2One('product.product', 'Máquina',
                               domain=[('template.product_type_printery', '=', 'maquina')],
                               required=True)
     producto_papel = fields.Many2One('sale_printery_budget.calcular_papel.producto',
-                        u'Papel',
-                        domain=[('id_wizard', '=', Eval('id_wizard_start'))],
-                        required=True,
-                        states={'readonly': False,})
+        'Papel', states={
+            'readonly': False,
+            }, domain=[
+            ('id_wizard', '=', Eval('id_wizard_start')),
+            ], depends=['id_wizard_start'], required=True)
     demasia_variable = fields.Integer('Demasia Variable(%)', required=True)
     demasia_fija = fields.Integer('Demasia Fija', required=True)
-    tinta = fields.Many2One('product.product', u'Tinta',
+    tinta = fields.Many2One('product.product', 'Tinta',
                               domain=[('template.product_type_printery', '=', 'tinta')],
                               required=True)
     tinta_superficie_cubierta = fields.Integer('Tinta (superficie Cubierta(%))', required=True)
     velocidad_maquina = fields.Selection([
-        ('tiempo_rapido', u'Tiempo Rápido'),
-        ('tiempo_medio', u'Tiempo Medio'),
-        ('tiempo_lento', u'Tiempo Lento'),
+        ('tiempo_rapido', 'Tiempo Rápido'),
+        ('tiempo_medio', 'Tiempo Medio'),
+        ('tiempo_lento', 'Tiempo Lento'),
     ], 'Velocidad Maquina', required=True)
     # Campos readonly
     trabajos_por_pliego = fields.Char('Trabajos por Pliego', states={'readonly': True})
@@ -469,9 +469,9 @@ class CalcularPapelWizard(ModelView):
     plancha_adicional = fields.Integer('Plancha Adicional', states={'readonly': False}, required=True)
     pliegos_netos = fields.Integer('Pliegos Netos', states={'readonly': True})
     postura_trabajo = fields.Selection([('H', 'Horizontal'),('V', 'Vertical')],
-                               u'Postura Trabajo', states={'readonly': True})
+                               'Postura Trabajo', states={'readonly': True})
     postura_papel = fields.Selection([('H', 'Horizontal'),('V', 'Vertical')],
-                               u'Postura Papel', states={'readonly': True})
+                               'Postura Papel', states={'readonly': True})
     @classmethod
     def __setup__(cls):
         super(CalcularPapelWizard, cls).__setup__()

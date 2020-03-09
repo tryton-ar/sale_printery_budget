@@ -1,4 +1,3 @@
-# coding=utf-8
 #This file is part of the sale_printery_budget module for Tryton.
 #The COPYRIGHT file at the top level of this repository contains
 #the full copyright notices and license terms.
@@ -18,7 +17,7 @@ class utils():
     interior = {}
 
     def test(self):
-        logger.info(u'testeando: %s', str(self.interior.calle_horizontal))
+        logger.info('testeando: %s', str(self.interior.calle_horizontal))
 
     def creo_orden_trabajo(self, sale, lineas_venta):
         "Crear orden de trabajo basado en el papel elegido"
@@ -135,7 +134,7 @@ class utils():
         planchas_totales = self.interior.cantidad_planchas + self.interior.plancha_adicional
 
         res['planchas_totales'] = planchas_totales
-        description = u'Plancha'
+        description = 'Plancha'
         fijo = True
         self._save_sale_line(SaleLine, t, self.interior.maquina.plancha, planchas_totales, description, fijo)
 
@@ -193,7 +192,7 @@ class utils():
         tiempo_impresion =  (Decimal(self.interior.producto_papel.cantidad_de_pliegos + demasia_variable + demasia_fija) * Decimal(cantidad_pasadas)) / Decimal(velocidad_maquina)
 
         res['tiempo_impresion'] = tiempo_impresion.quantize(Decimal('.01'))
-        description = u'Tiempo de impresión máquina'
+        description = 'Tiempo de impresión máquina'
         fijo = False
         self._save_sale_line(SaleLine, t, self.interior.maquina, tiempo_impresion.quantize(Decimal('.01')), description, fijo)
 
@@ -208,7 +207,7 @@ class utils():
         ## costo_kilo_tinta
         res['cantidad_tinta'] = cantidad_tinta.quantize(Decimal('.01'))
 
-        description = u'Tinta'
+        description = 'Tinta'
         fijo = False
         self._save_sale_line(SaleLine, t, self.interior.tinta, cantidad_tinta.quantize(Decimal('.01')), description, fijo)
 
@@ -227,14 +226,14 @@ class utils():
         tiempo_arranque = tiempo_arranque / Decimal(60)
 
         res['tiempo_arranque'] = tiempo_arranque.quantize(Decimal('.01'))
-        description = u'Tiempo de arranque máquina'
+        description = 'Tiempo de arranque máquina'
         fijo = True
         self._save_sale_line(SaleLine, t, self.interior.maquina, tiempo_arranque.quantize(Decimal('.01')), description, fijo)
 
         # Doblado
         if self.interior.doblado:
             cantidad_doblado = self.interior.cantidad / self.interior.doblado.velocidad_maq
-            description = u'Doblado'
+            description = 'Doblado'
             fijo = True
             self._save_sale_line(SaleLine, t, self.interior.doblado, cantidad_doblado.quantize(Decimal('.01')), description, fijo)
 
@@ -249,14 +248,14 @@ class utils():
             broche = Product.search([('id', '=', self.interior.encuadernado.broche.id)])[0]
             cantidad_broches = self.interior.cantidad * self.interior.cantidad_broches
 
-            description = u'Encuadernado (broches)'
+            description = 'Encuadernado (broches)'
             fijo = False
             self._save_sale_line(SaleLine, t, broche, cantidad_broches, description, fijo)
 
             cantidad_proceso = Decimal(self.interior.cantidad) / Decimal(self.interior.encuadernado.velocidad_maq) + Decimal(ceil(self.interior.cantidad_paginas / self.interior.producto_papel.pliegos_por_hoja)) \
                       * Decimal(self.interior.encuadernado.tiempo_arreglo)
 
-            description = u'Encuadernado (proceso)'
+            description = 'Encuadernado (proceso)'
             fijo = False
             self._save_sale_line(SaleLine, t, self.interior.encuadernado, cantidad_proceso.quantize(Decimal('.01')), description, fijo)
 
@@ -266,7 +265,7 @@ class utils():
             material_laminado = Product.search([('id', '=', self.interior.laminado.material_laminado.id)])[0]
             cantidad_material_laminado = ceil((self.interior.producto_papel.ancho_pliego / 100) * (self.interior.producto_papel.alto_pliego / 100) * self.interior.producto_papel.cantidad_de_pliegos)
 
-            description = u'Laminado (material)'
+            description = 'Laminado (material)'
             fijo = False
             self._save_sale_line(SaleLine, t, material_laminado, cantidad_material_laminado, description, fijo)
 
@@ -275,7 +274,7 @@ class utils():
             cantidad_proceso = Decimal(self.interior.producto_papel.alto_pliego / 100) * Decimal(self.interior.producto_papel.cantidad_de_pliegos) / Decimal(self.interior.laminado.velocidad_maq) \
                       + Decimal(self.interior.laminado.tiempo_arreglo)
 
-            description = u'Laminado (proceso)'
+            description = 'Laminado (proceso)'
             fijo = False
             self._save_sale_line(SaleLine, t, self.interior.laminado, cantidad_proceso.quantize(Decimal('.01')), description, fijo)
 

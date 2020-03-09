@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 #This file is part sale_printery_budget module for Tryton.
 #The COPYRIGHT file at the top level of this repository contains
 #the full copyright notices and license terms.
@@ -30,12 +29,11 @@ TYPES_PRINTERY = [
     ('otros', 'Otros'),
     ]
 
-class Template:
-    __metaclass__ = PoolMeta
+class Template(metaclass=PoolMeta):
     __name__ = "product.template"
 
     product_type_printery = fields.Selection(TYPES_PRINTERY, 'Product Types', required=True, states=STATES,depends=DEPENDS)
-    genera_contribucion_marginal = fields.Boolean(u'Genera Contribución Marginal', select=False)
+    genera_contribucion_marginal = fields.Boolean('Genera Contribución Marginal', select=False)
     cambio_de_plancha = fields.Integer('Cambio de Plancha',
                                        states={
                                            'invisible':  Not(Equal(Eval('product_type_printery'), 'maquina'))
@@ -48,12 +46,12 @@ class Template:
                                             },
                                             depends=['cambio_de_plancha'])
 
-    preparacion = fields.Integer(u'Preparación (por cada color)',
+    preparacion = fields.Integer('Preparación (por cada color)',
                                  states={
                                      'invisible':  Not(Equal(Eval('product_type_printery'), 'maquina'))
                                  })
 
-    preparacion_uom = fields.Many2One('product.uom', u'Preparación Uom',
+    preparacion_uom = fields.Many2One('product.uom', 'Preparación Uom',
                                       domain=[('category', '=', Id('product', 'uom_cat_time'))],
                                       states={
                                           'invisible':  Not(Equal(Eval('product_type_printery'), 'maquina')),
@@ -61,48 +59,48 @@ class Template:
                                       },
                                       depends=['cambio_de_plancha'])
 
-    tiempo_rapido = fields.Integer(u'Impresiones por hora (Rápido)',
+    tiempo_rapido = fields.Integer('Impresiones por hora (Rápido)',
                                    states={
                                        'invisible':  Not(Equal(Eval('product_type_printery'), 'maquina'))
                                    })
 
-    tiempo_medio = fields.Integer(u'Impresiones por hora (Medio)',
+    tiempo_medio = fields.Integer('Impresiones por hora (Medio)',
                                   states={
                                       'invisible':  Not(Equal(Eval('product_type_printery'), 'maquina'))
                                   })
 
-    tiempo_lento = fields.Integer(u'Impresiones por hora (Lento)',
+    tiempo_lento = fields.Integer('Impresiones por hora (Lento)',
                                   states={
                                       'invisible':  Not(Equal(Eval('product_type_printery'), 'maquina'))
                                   })
 
-    plancha = fields.Many2One('product.product', u'Plancha',
+    plancha = fields.Many2One('product.product', 'Plancha',
                               states={
                                   'invisible':  Not(Equal(Eval('product_type_printery'), 'maquina'))
                               },
                               domain=[('product_type_printery', '=', 'plancha')],
                               required=False)
 
-    width_max = fields.Float(u'Ancho Máximo',
-                             digits=(16, Eval('width_digits', 2)),
-                             states={
-                             #    'invisible':  Not(Equal(Eval('product_type_printery'), 'maquina'))
-                             })
-    width_min = fields.Float(u'Ancho Mínimo',
-                             digits=(16, Eval('width_digits', 2)),
-                             states={
-                             #    'invisible':  Not(Equal(Eval('product_type_printery'), 'maquina'))
-                             })
-    height_max = fields.Float(u'Alto Máximo',
-                              digits=(16, Eval('height_digits', 2)),
-                              states={
-                              #    'invisible':  Not(Equal(Eval('product_type_printery'), 'maquina')),
-                              })
-    height_min = fields.Float(u'Alto Mínimo',
-                              digits=(16, Eval('height_digits', 2)),
-                              states={
-                              #    'invisible':  Not(Equal(Eval('product_type_printery'), 'maquina')),
-                              })
+    width_max = fields.Float('Ancho Máximo',
+        digits=(16, Eval('width_digits', 2)),
+        states={
+            #    'invisible':  Not(Equal(Eval('product_type_printery'), 'maquina'))
+            }, depends=['width_digits'])
+    width_min = fields.Float('Ancho Mínimo',
+        digits=(16, Eval('width_digits', 2)),
+        states={
+            #    'invisible':  Not(Equal(Eval('product_type_printery'), 'maquina'))
+            }, depends=['width_digits'])
+    height_max = fields.Float('Alto Máximo',
+        digits=(16, Eval('height_digits', 2)),
+        states={
+            #    'invisible':  Not(Equal(Eval('product_type_printery'), 'maquina')),
+            }, depends=['height_digits'])
+    height_min = fields.Float('Alto Mínimo',
+        digits=(16, Eval('height_digits', 2)),
+        states={
+            #    'invisible':  Not(Equal(Eval('product_type_printery'), 'maquina')),
+            }, depends=['height_digits'])
 
     #Pinza, cola y Laterales (en cm).
     colores = fields.Integer('Colores Pasada',
@@ -138,14 +136,14 @@ class Template:
                                   'invisible':  ~Eval('product_type_printery').in_(['maquina_laminado', 'maquina_encuadernacion']),
                                   'required':  Eval('product_type_printery').in_(['maquina_laminado', 'maquina_encuadernacion']),
                               })
-    broche = fields.Many2One('product.product', u'Broche',
+    broche = fields.Many2One('product.product', 'Broche',
                               states={
                                   'invisible':  Not(Equal(Eval('product_type_printery'), 'maquina_encuadernacion')),
                                   'required':  Equal(Eval('product_type_printery'), 'maquina_encuadernacion'),
                               },
                               domain=[('product_type_printery', '=', 'broche')],
                               required=False)
-    material_laminado = fields.Many2One('product.product', u'Material Laminado',
+    material_laminado = fields.Many2One('product.product', 'Material Laminado',
                               states={
                                   'invisible':  Not(Equal(Eval('product_type_printery'), 'maquina_laminado')),
                                   'required':  Equal(Eval('product_type_printery'), 'maquina_laminado'),
@@ -153,20 +151,20 @@ class Template:
                               domain=[('product_type_printery', '=', 'material_laminado')],
                               required=False)
     # Plancha
-    pliegos_por_plancha = fields.Integer(u'Pliegos por Plancha',
+    pliegos_por_plancha = fields.Integer('Pliegos por Plancha',
                                  states={
                                      'invisible':  Not(Equal(Eval('product_type_printery'), 'plancha'))
                                  })
-    rendimiento_tinta = fields.Integer(u'Rendimiento de Tinta (gr/m2)',
+    rendimiento_tinta = fields.Integer('Rendimiento de Tinta (gr/m2)',
                                  states={
                                      'invisible':  Not(Equal(Eval('product_type_printery'), 'tinta')),
                                      'required':  Eval('product_type_printery').in_(['tinta']),
                                  })
-    demasia_fija = fields.Integer(u'Demasia Fija',
+    demasia_fija = fields.Integer('Demasia Fija',
                                  states={
                                      'invisible':  Not(Equal(Eval('product_type_printery'), 'maquina'))
                                  })
-    demasia_variable = fields.Integer(u'Demasia Variable (%)',
+    demasia_variable = fields.Integer('Demasia Variable (%)',
                                  states={
                                      'invisible':  Not(Equal(Eval('product_type_printery'), 'maquina'))
                                  })
