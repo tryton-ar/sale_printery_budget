@@ -128,7 +128,8 @@ the full copyright notices and license terms. -->
             <field name="menu" ref="menu_trabajo"/>
             <field name="group" ref="group_trabajo"/>
         </record>
-        <menuitem id="menu_sale_printery_budget_trabajo" parent="menu_trabajo" action="act_trabajo_form"/>
+        <menuitem id="menu_sale_printery_budget_trabajo" parent="menu_trabajo"
+            action="act_trabajo_form" icon="tryton-list"/>
         <record model="ir.ui.menu-res.group" id="menu_sale_printery_budget_trabajo_group_trabajo">
             <field name="menu" ref="menu_sale_printery_budget_trabajo"/>
             <field name="group" ref="group_trabajo"/>
