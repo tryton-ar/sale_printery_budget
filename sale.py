@@ -297,11 +297,13 @@ class PresupuestoClienteReport(Report):
     @classmethod
     def get_context(cls, records, data):
         pool = Pool()
+        Date = pool.get('ir.date')
         User = pool.get('res.user')
         user = User(Transaction().user)
-        report_context = super(PresupuestoClienteReport, cls).get_context(records, data)
-        report_context['company'] = user.company
-        return report_context
+        context = super(PresupuestoClienteReport, cls).get_context(records, data)
+        context['company'] = user.company
+        context['today'] = Date.today()
+        return context
 
 
 class SaleLine(metaclass=PoolMeta):
