@@ -10,7 +10,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-class utils():
+class Utils():
     interior = {}
 
     def test(self):
@@ -133,7 +133,7 @@ class utils():
         res['planchas_totales'] = planchas_totales
         description = 'Plancha'
         fijo = True
-        self._save_sale_line(SaleLine, t, self.interior.maquina.plancha, planchas_totales, description, fijo)
+        self._save_sale_line(SaleLine, t, self.interior.maquina.template.plancha, planchas_totales, description, fijo)
 
         # Creamos línea de Pliegos Demasia Fija
         # Cantidad de Planchas * Cantidad de Pliegos en maquina.
@@ -181,10 +181,10 @@ class utils():
         # => 1000 * 4 = 4000 pliegos
         # => tiempo_impresion = 4000 pliegos / velocidad_maquina
 
-        cantidad_pasadas = ceil((Decimal(self.interior.colores_frente) / Decimal(self.interior.maquina.colores))) \
-            + ceil((Decimal(self.interior.colores_dorso) / Decimal(self.interior.maquina.colores)))
+        cantidad_pasadas = ceil((Decimal(self.interior.colores_frente) / Decimal(self.interior.maquina.template.colores))) \
+            + ceil((Decimal(self.interior.colores_dorso) / Decimal(self.interior.maquina.template.colores)))
 
-        velocidad_maquina = getattr(self.interior.maquina, self.interior.velocidad_maquina)
+        velocidad_maquina = getattr(self.interior.maquina.template, self.interior.velocidad_maquina)
 
         tiempo_impresion =  (Decimal(self.interior.producto_papel.cantidad_de_pliegos + demasia_variable + demasia_fija) * Decimal(cantidad_pasadas)) / Decimal(velocidad_maquina)
 
@@ -197,7 +197,7 @@ class utils():
         ## Formula:
         cantidad_tinta = Decimal(self.interior.producto_papel.ancho_pliego / 100) * Decimal(self.interior.producto_papel.alto_pliego / 100) * \
             Decimal(self.interior.producto_papel.cantidad_de_pliegos + demasia_variable + demasia_fija) * Decimal(cantidad_pasadas) * \
-            Decimal(self.interior.tinta.rendimiento_tinta) / 1000 * Decimal(self.interior.tinta_superficie_cubierta / 100.0)
+            Decimal(self.interior.tinta.template.rendimiento_tinta) / 1000 * Decimal(self.interior.tinta_superficie_cubierta / 100.0)
 
         ## ancho_pliego(metros) * alto_pliego(metros) -> area de pliego *
         ## cantidad_de_pliegos * rendimiento_tinta (gramos/m2) / 1000 *
@@ -219,7 +219,7 @@ class utils():
         # => tiempo_impresion = 4000 pliegos / velocidad_maquina
         # => tiempo_arranque en horas = cantidad_planchas * (cambio_de_plancha +
         # tiempo_preparacion) / 60
-        tiempo_arranque = Decimal(planchas_totales) * Decimal((self.interior.maquina.cambio_de_plancha + self.interior.maquina.preparacion))
+        tiempo_arranque = Decimal(planchas_totales) * Decimal((self.interior.maquina.template.cambio_de_plancha + self.interior.maquina.template.preparacion))
         tiempo_arranque = tiempo_arranque / Decimal(60)
 
         res['tiempo_arranque'] = tiempo_arranque.quantize(Decimal('.01'))

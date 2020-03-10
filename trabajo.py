@@ -1,16 +1,12 @@
-#This file is part of the sale_printery_budget module for Tryton.
-#The COPYRIGHT file at the top level of this repository contains
-#the full copyright notices and license terms.
+# This file is part of the sale_printery_budget module for Tryton.
+# The COPYRIGHT file at the top level of this repository contains
+# the full copyright notices and license terms.
 
 from trytond.model import ModelView, ModelSQL, fields, Workflow
-#from trytond.transaction import Transaction
-from trytond.pyson import Id
 from trytond.pyson import Eval
 from trytond.report import Report
-import logging
-logger = logging.getLogger(__name__)
 
-_all__ = ['OrdenTrabajo', 'OrdenTrabajoReport']
+__all__ = ['OrdenTrabajo', 'OrdenTrabajoReport']
 
 ORIENTACION = [
     ('', ''),
@@ -18,6 +14,7 @@ ORIENTACION = [
     ('dorso', 'Dorso'),
     ('frente_dorso', 'Frente/Dorso'),
 ]
+
 
 class OrdenTrabajo(Workflow, ModelSQL, ModelView):
     "Ordenes de Trabajo"
@@ -41,26 +38,32 @@ class OrdenTrabajo(Workflow, ModelSQL, ModelView):
     cantidad = fields.Integer('Cantidad', readonly=True)
     sale = fields.Many2One('sale.sale', 'Sale')
     categoria = fields.Selection([
-        ('revista_libro', 'Revista/Libro'),
-        ('folleto', 'Folleto'),
-        ('cuaderno', 'Cuaderno'),
-    ], 'Categoria', readonly=True)
-    altura = fields.Numeric('Altura', digits=(16, 2),
-                            readonly=True)
-    ancho = fields.Numeric('Ancho', digits=(16, 2),
-                           readonly=True)
+            ('revista_libro', 'Revista/Libro'),
+            ('folleto', 'Folleto'),
+            ('cuaderno', 'Cuaderno'),
+            ], 'Categoria', readonly=True)
+    altura = fields.Numeric('Altura', digits=(16, 2), readonly=True)
+    ancho = fields.Numeric('Ancho', digits=(16, 2), readonly=True)
     es_tapa = fields.Boolean('¿Es tapa?', readonly=True)
-    calle_horizontal = fields.Numeric('Calle Horizontal', digits=(16, 2), readonly=True)
-    calle_vertical = fields.Numeric('Calle Vertical', digits=(16, 2), readonly=True)
+    calle_horizontal = fields.Numeric('Calle Horizontal', digits=(16, 2),
+        readonly=True)
+    calle_vertical = fields.Numeric('Calle Vertical', digits=(16, 2),
+        readonly=True)
     sin_pinza = fields.Boolean('Sin Pinza', readonly=True)
-    producto_papel = fields.Many2One('product.product', 'Papel', select=True, readonly=True)
+    producto_papel = fields.Many2One('product.product', 'Papel',
+        readonly=True)
     tipo_papel = fields.Many2One('product.category', 'Tipo de papel',
-                                 domain=[('parent', '=', Id('sale_printery_budget', 'cat_papel'))], readonly=True)
+        readonly=True)
     maquina = fields.Many2One('product.product', 'Máquina',
-                              domain=[('product_type_printery', '=', 'maquina')], readonly=True)
+        domain=[
+            ('template.product_type_printery', '=', 'maquina'),
+            ], readonly=True)
     tinta = fields.Many2One('product.product', 'Tinta',
-                              domain=[('product_type_printery', '=', 'tinta')], readonly=True)
-    tinta_superficie_cubierta = fields.Integer('Tinta (superficie Cubierta(%))', readonly=True)
+        domain=[
+            ('template.product_type_printery', '=', 'tinta'),
+            ], readonly=True)
+    tinta_superficie_cubierta = fields.Integer('Tinta (superficie Cubierta(%))',
+        readonly=True)
     colores_frente = fields.Integer('Colores Frente', readonly=True)
     colores_dorso = fields.Integer('Colores Dorso', readonly=True)
     ancho_pliego = fields.Float('Ancho Pliego', digits=(16, 2), readonly=True)
@@ -68,18 +71,24 @@ class OrdenTrabajo(Workflow, ModelSQL, ModelView):
     pliegos_netos = fields.Integer('Pliegos Netos', readonly=True)
     cantidad_hojas = fields.Integer('Cantidad de Hojas', readonly=True)
     desperdicio = fields.Numeric('Desperdicio (%)', digits=(3, 0), readonly=True)
-    trabajos_por_pliego = fields.Char('Trabajos por Pliego', states={'readonly': True})
+    trabajos_por_pliego = fields.Char('Trabajos por Pliego',
+        states={'readonly': True})
     formato_pliego = fields.Char('Formato Pliego', states={'readonly': True})
-    cantidad_planchas = fields.Integer('Cantidad Planchas', states={'readonly': True})
-    postura_trabajo = fields.Selection([('H', 'Horizontal'),('V', 'Vertical')],
-                               'Postura Trabajo', states={'readonly': True})
-    postura_papel = fields.Selection([('H', 'Horizontal'),('V', 'Vertical')],
-                               'Postura Papel', states={'readonly': True})
+    cantidad_planchas = fields.Integer('Cantidad Planchas',
+        states={'readonly': True})
+    postura_trabajo = fields.Selection([
+            ('H', 'Horizontal'),
+            ('V', 'Vertical')
+            ], 'Postura Trabajo', states={'readonly': True})
+    postura_papel = fields.Selection([
+            ('H', 'Horizontal'),
+            ('V', 'Vertical')
+            ], 'Postura Papel', states={'readonly': True})
     velocidad_maquina = fields.Selection([
-        ('tiempo_rapido', 'Tiempo Rápido'),
-        ('tiempo_medio', 'Tiempo Medio'),
-        ('tiempo_lento', 'Tiempo Lento'),
-    ], 'Velocidad Maquina', readonly=True)
+            ('tiempo_rapido', 'Tiempo Rápido'),
+            ('tiempo_medio', 'Tiempo Medio'),
+            ('tiempo_lento', 'Tiempo Lento'),
+            ], 'Velocidad Maquina', readonly=True)
     solapa = fields.Numeric('Solapa', digits=(16, 2), readonly=True)
     lomo = fields.Numeric('Lomo', digits=(16, 2), readonly=True)
     cantidad_paginas = fields.Integer('Cantidad de Paginas', readonly=True)

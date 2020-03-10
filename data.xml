@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<tryton>
+    <data skiptest="1" grouped="1">
+        <record model="product.category" id="cat_papel">
+            <field name="name">PAPEL</field>
+        </record>
+        <record model="product.category" id="cat_papel_bobina">
+            <field name="name">PAPEL BOBINA</field>
+        </record>
+    </data>
+</tryton>

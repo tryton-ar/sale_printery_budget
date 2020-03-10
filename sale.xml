@@ -72,29 +72,12 @@
            <field name="name">producto_papel_tree</field>
        </record>
 
-        <!-- Ventas expired -->
-        <record model="ir.action.act_window" id="act_sale_form">
-            <field name="name">Sales</field>
-            <field name="res_model">sale.sale</field>
-            <field name="search_value"></field>
-        </record>
-        <record model="ir.action.act_window.domain" id="act_sale_form_domain_expired">
-            <field name="name">Expired</field>
-            <field name="sequence" eval="50"/>
-            <field name="domain"
-                eval="[('state', '=', 'expired')]"
-                pyson="1"/>
-            <field name="act_window" ref="act_sale_form"/>
-        </record>
-
         <!-- Reportes -->
-
        <record model="ir.action.report" id="report_sale_printery_budget">
            <field name="name">Presupuesto al Cliente</field>
-           <field name="report_name">sale_printery_budget.presupuesto_cliente</field>
            <field name="model">sale.sale</field>
+           <field name="report_name">sale_printery_budget.presupuesto_cliente</field>
            <field name="report">sale_printery_budget/presupuesto_cliente.fodt</field>
-           <field name="template_extension">odt</field>
        </record>
 
         <record model="ir.action.keyword" id="report_sale_printery_budget_keyword">

@@ -17,7 +17,7 @@ from trytond.pool import PoolMeta
 import logging
 logger = logging.getLogger(__name__)
 
-_all__ = ['Sale', 'SaleLine', 'OtraCantidad', 'CalcularPapelWizard',
+__all__ = ['Sale', 'SaleLine', 'OtraCantidad', 'CalcularPapelWizard',
     'CalcularPapelProducto', 'CalcularPapelElegirInterior',
     'PresupuestoClienteReport', 'CalcularPapel', 'RetomarCalcularPapel']
 
@@ -78,7 +78,7 @@ class OtraCantidad(ModelSQL, ModelView):
                 return False
 
             Product = Pool().get('product.product')
-            genera_contribucion_marginal = line.product.genera_contribucion_marginal
+            genera_contribucion_marginal = line.product.template.genera_contribucion_marginal
 
             if type(line.product) is not Product:
                 return False
@@ -134,9 +134,7 @@ class Sale(metaclass=PoolMeta):
             'readonly': Eval('state') != 'draft',
             }, depends=['state'])
     otra_cantidad = fields.One2Many('sale_printery_budget.otra_cantidad',
-        'sale_id',
-        'Otra Cantidad',
-        states={
+        'sale_id', 'Otra Cantidad', states={
             'readonly': Eval('state') != 'draft',
             }, depends=['state'])
     orden_trabajo = fields.One2Many('sale_printery_budget.orden_trabajo',
@@ -153,21 +151,12 @@ class Sale(metaclass=PoolMeta):
         states={
             'invisible': Eval('state').in_(['draft', 'cancel']),
             'readonly': Eval('state') != 'quotation',
-            'required': ~Eval('state').in_(['draft', 'quotation', 'cancel', 'expired']),
+            'required': ~Eval('state').in_(['draft', 'quotation', 'cancel']),
             }, depends=['id', 'state'])
-    state = fields.Selection([
-            ('draft', 'Draft'),
-            ('quotation', 'Quotation'),
-            ('confirmed', 'Confirmed'),
-            ('processing', 'Processing'),
-            ('done', 'Done'),
-            ('cancel', 'Canceled'),
-            ('expired', 'Vencida'),
-            ], 'State', readonly=True, required=True)
     sale_date = fields.Date('Sale Date',
         states={
             'readonly': ~Eval('state').in_(['draft', 'quotation']),
-            'required': ~Eval('state').in_(['draft', 'quotation', 'cancel', 'expired']),
+            'required': ~Eval('state').in_(['draft', 'quotation', 'cancel']),
             },
         depends=['state'])
 
@@ -186,16 +175,6 @@ class Sale(metaclass=PoolMeta):
                     'invisible': ~Eval('state').in_(['draft']),
                     },
                 })
-
-    @classmethod
-    def vencimiento_trigger(self):
-        ''' Cambia el estado a vencimiento de las ventas presupuestadas hace mas de 15 días '''
-        Sale = Pool().get('sale.sale')
-
-        # Chequear la function trigger_write.
-        #http://doc.tryton.org/3.0/trytond/doc/ref/models/models.html#trytond.model.ModelStorage.trigger_write
-        sales = Sale.search([('state', '=', 'quotation'), ('write_date', '<', datetime.datetime.now() - datetime.timedelta(days=15))])
-        Sale.write([s['id'] for s in sales], {'state': 'expired'})
 
     @classmethod
     def view_attributes(cls):
@@ -242,8 +221,9 @@ class Sale(metaclass=PoolMeta):
             cantidad_confirmada = cantidad_vals['cantidad']
             utilidad = cantidad_vals['utilidad']
 
-            utilidad_producto = Product.search([('product_type_printery', '=', \
-                                    'utilidad')])[0]
+            utilidad_producto, = Product.search([
+                    ('template.product_type_printery', '=', 'utilidad'),
+                    ])
             # Agregar línea utilidad
             sale_line = {
                 'sale': sale.id,
@@ -296,8 +276,8 @@ class Sale(metaclass=PoolMeta):
                 'cantidad_confirmada': sale.cantidad_confirmada.id,
                 'cantidad': sale.cantidad_confirmada.cantidad,
                 'cantidad_planchas': ceil(Decimal(orden_trabajo.cantidad_planchas * escala).quantize(Decimal('.01'))),
-                'pliegos_demasia_variable':ceil(Decimal(orden_trabajo.pliegos_demasia_variable * escala).quantize(Decimal('.01'))),
-                'tiempo_impresion':Decimal(orden_trabajo.tiempo_impresion * Decimal(escala)).quantize(Decimal('.01')),
+                'pliegos_demasia_variable': ceil(Decimal(orden_trabajo.pliegos_demasia_variable * escala).quantize(Decimal('.01'))),
+                'tiempo_impresion': Decimal(orden_trabajo.tiempo_impresion * Decimal(escala)).quantize(Decimal('.01')),
             }
 
             OrdenTrabajo.write([orden_trabajo], update_line)
@@ -393,12 +373,13 @@ class CalcularPapelWizard(ModelView):
     id_wizard_start = fields.Char('id de wizard', states={'invisible': True})
     sale_id = fields.Integer('sale_id', states={'invisible': True})
     producto_id = fields.Integer('id de producto', states={'invisible': True})
-    cantidad = fields.Integer('Cantidad', required=True, states={'invisible': False})
-    calle_horizontal = fields.Numeric('Calle Horizontal', digits=(16, 2), required=True)
-    calle_vertical = fields.Numeric('Calle Vertical', digits=(16, 2), required=True)
+    cantidad = fields.Integer('Cantidad', required=True,
+        states={'invisible': False})
+    calle_horizontal = fields.Numeric('Calle Horizontal', digits=(16, 2),
+        required=True)
+    calle_vertical = fields.Numeric('Calle Vertical', digits=(16, 2),
+        required=True)
     tipo_papel = fields.Many2One('product.category', 'Tipo de papel',
-        domain=[('parent', '=', Id('sale_printery_budget',
-                    'cat_papel'))],
         required=True)
     gramaje = fields.Numeric('Gramaje', digits=(16, 2), required=True)
     solapa = fields.Numeric('Solapa', digits=(16, 2), states={
@@ -532,10 +513,10 @@ class CalcularPapelWizard(ModelView):
         logger.info('on_change_maquina')
         self._generate_producto_papel(self)
         try:
-            if self.maquina.demasia_fija:
-                self.demasia_fija = self.maquina.demasia_fija
-            if self.maquina.demasia_variable:
-                self.demasia_variable = self.maquina.demasia_variable
+            if self.maquina.template.demasia_fija:
+                self.demasia_fija = self.maquina.template.demasia_fija
+            if self.maquina.template.demasia_variable:
+                self.demasia_variable = self.maquina.template.demasia_variable
         except:
             logger.info('Variable indefinida')
 
@@ -656,7 +637,7 @@ class CalcularPapelWizard(ModelView):
             papeles = Product.search([ 'AND', [
                         ('weight', '=', values.gramaje),
                         ], [
-                        ('product_type_printery', '=', 'papel'),
+                        ('template.product_type_printery', '=', 'papel'),
                         ], [ 'OR', [
                             ('account_category', '=', values.tipo_papel.id),
                             ], [
@@ -733,13 +714,13 @@ class CalcularPapelWizard(ModelView):
             ancho_papel = papel_producto.width
             alto_papel = papel_producto.height
 
-        if values.maquina.width_max < ancho_papel:
-            ancho_maximo = values.maquina.width_max
+        if values.maquina.template.width_max < ancho_papel:
+            ancho_maximo = values.maquina.template.width_max
         else:
             ancho_maximo = ancho_papel
 
-        if values.maquina.height_max < alto_papel:
-            alto_maximo = values.maquina.height_max
+        if values.maquina.template.height_max < alto_papel:
+            alto_maximo = values.maquina.template.height_max
         else:
             alto_maximo = alto_papel
 
@@ -752,7 +733,7 @@ class CalcularPapelWizard(ModelView):
                 ancho = values.ancho
                 altura = values.altura
 
-            ancho_de_trabajo = Decimal(values.maquina.laterales)
+            ancho_de_trabajo = Decimal(values.maquina.template.laterales)
             poses_ancho = 0
             while ancho_de_trabajo <= ancho_maximo:
                 poses_ancho = poses_ancho + 1
@@ -761,14 +742,14 @@ class CalcularPapelWizard(ModelView):
                 if poses_ancho > 1:
                     ancho_de_trabajo = ancho_de_trabajo + calle_horizontal
 
-                if ancho_de_trabajo >= values.maquina.width_min and ancho_de_trabajo <= ancho_maximo:
+                if ancho_de_trabajo >= values.maquina.template.width_min and ancho_de_trabajo <= ancho_maximo:
 
                     # Por lo menos tenemos un folleto. Ahora verificamos
                     # cuantos van en vertical.
                     if sin_pinza:
                         alto_de_trabajo = Decimal(0)
                     else:
-                        alto_de_trabajo = Decimal(values.maquina.pinza + values.maquina.cola)
+                        alto_de_trabajo = Decimal(values.maquina.template.pinza + values.maquina.template.cola)
 
                     poses_alto = 0
                     while alto_de_trabajo <= alto_maximo:
@@ -779,7 +760,7 @@ class CalcularPapelWizard(ModelView):
                         if poses_alto > 1:
                             alto_de_trabajo = alto_de_trabajo + calle_vertical
 
-                        if alto_de_trabajo >= values.maquina.height_min and alto_de_trabajo <= alto_maximo:
+                        if alto_de_trabajo >= values.maquina.template.height_min and alto_de_trabajo <= alto_maximo:
                             # Por último, si es usado, se hacen los cálculos de pliegos por hoja,
                             # etc
                             pliegos_por_hoja = (Decimal(alto_papel) // alto_de_trabajo) * \
@@ -814,6 +795,11 @@ class CalcularPapel(Wizard):
 
     terminar = StateTransition()
 
+    @classmethod
+    def __setup__(cls):
+        super(CalcularPapel, cls).__setup__()
+        cls._allowed_sale_states = {'draft'}
+
     def default_interior(self, fields):
         "Crear las lineas de producto en la venta"
         logger.info('default_interior')
@@ -822,9 +808,13 @@ class CalcularPapel(Wizard):
         # Si es asi, entonces cargo las lineas.
         t = Transaction()
         Sale = Pool().get('sale.sale')
-        ut = utils()
+        ut = Utils()
         ut.interior = self.interior
-        sale = Sale.search([('id', '=', t.context['active_id'])])[0]
+        active_id = Transaction().context['active_id']
+        sale, = Sale.search([
+                ('id', '=', active_id),
+                ('state', 'in', self._allowed_sale_states),
+                ])
         res = {
             'categoria': 'folleto',
             'calle_horizontal': Decimal('0.5'),
@@ -834,7 +824,7 @@ class CalcularPapel(Wizard):
             'plancha_adicional': 0,
             'cantidad_paginas': 4,
             'cantidad': sale.cantidad,
-            'sale_id': sale.id,
+            'sale_id': active_id,
         }
 
         if hasattr(self.interior, 'producto_papel') == False or self.interior.producto_papel is None:
@@ -859,7 +849,7 @@ class CalcularPapel(Wizard):
         t = Transaction()
         Sale = Pool().get('sale.sale')
         sale = Sale.search([('id', '=', t.context['active_id'])])[0]
-        ut = utils()
+        ut = Utils()
         ut.interior = self.interior
 
         if hasattr(self.interior, 'producto_papel') == False or self.interior.producto_papel is None:
@@ -913,7 +903,7 @@ class RetomarCalcularPapel(Wizard):
         "Crear las lineas de producto en la venta"
         logger.info('default_retomar_calcular_papel_interior')
         pool = Pool()
-        ut = utils()
+        ut = Utils()
         OrdenTrabajo = pool.get('sale_printery_budget.orden_trabajo')
         interior = OrdenTrabajo.search([('id', '=', self.elegir_interior.orden_trabajo.id)])[0]
         # Borrar producto temporal anterior
@@ -969,7 +959,7 @@ class RetomarCalcularPapel(Wizard):
 
         pool = Pool()
         t = Transaction()
-        ut = utils()
+        ut = Utils()
         Sale = pool.get('sale.sale')
         sale = Sale.search([('id', '=', t.context['active_id'])])[0]
         OrdenTrabajo = pool.get('sale_printery_budget.orden_trabajo')
