@@ -49,6 +49,8 @@ dependency_links = [
     'https://github.com/tryton-ar/sale_printery_budget/tarball/%s.%s#egg=trytonar_sale_printery_budget-%s.%s' \
         % (major_version, minor_version, major_version, minor_version),
     ]
+if minor_version % 2:
+    dependency_links.append('https://trydevpi.tryton.org/')
 
 setup(name=name,
     version=version,
