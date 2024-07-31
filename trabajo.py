@@ -185,5 +185,5 @@ class OrdenTrabajoReport(Report):
     __name__ = 'sale_printery_budget.orden_trabajo'
 
     @classmethod
-    def get_context(cls, records, data):
-        return super(OrdenTrabajoReport, cls).get_context(records, data)
+    def get_context(cls, records, header, data):
+        return super(OrdenTrabajoReport, cls).get_context(records, header, data)

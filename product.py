@@ -35,8 +35,7 @@ class Template(metaclass=PoolMeta):
     __name__ = "product.template"
     product_type_printery = fields.Selection(TYPES_PRINTERY, 'Product Types',
         required=True, states=STATES, depends=DEPENDS)
-    genera_contribucion_marginal = fields.Boolean('Contribución Marginal',
-        select=False)
+    genera_contribucion_marginal = fields.Boolean('Contribución Marginal')
     cambio_de_plancha = fields.Integer('Cambio de Plancha',
         states={
             'invisible': Not(Equal(Eval('product_type_printery'), 'maquina'))
@@ -78,14 +77,10 @@ class Template(metaclass=PoolMeta):
             ('template.product_type_printery', '=', 'plancha'),
             ],
         depends=['product_type_printery'])
-    width_max = fields.Float('Ancho Máximo', digits=(16,
-            Eval('width_digits', 2)), depends=['width_digits'])
-    width_min = fields.Float('Ancho Mínimo', digits=(16,
-            Eval('width_digits', 2)), depends=['width_digits'])
-    height_max = fields.Float('Alto Máximo', digits=(16,
-            Eval('height_digits', 2)), depends=['height_digits'])
-    height_min = fields.Float('Alto Mínimo', digits=(16,
-            Eval('height_digits', 2)), depends=['height_digits'])
+    width_max = fields.Float('Ancho Máximo', digits='width_uom')
+    width_min = fields.Float('Ancho Mínimo', digits='width_uom')
+    height_max = fields.Float('Alto Máximo', digits='height_uom')
+    height_min = fields.Float('Alto Mínimo', digits='height_uom')
     colores = fields.Integer('Colores Pasada',
         states={
             'invisible': Not(Equal(Eval('product_type_printery'), 'maquina')),
@@ -171,7 +166,7 @@ class Template(metaclass=PoolMeta):
 
     @classmethod
     def view_attributes(cls):
-        return super(Template, cls).view_attributes() + [
+        return super().view_attributes() + [
             ('//page[@id="mediciones_maquina"]', 'states', {
                     'invisible': Not(Eval('product_type_printery').in_(
                             ['maquina'])),

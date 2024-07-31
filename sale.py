@@ -6,6 +6,7 @@ from .utils import *
 from decimal import Decimal
 import datetime
 import uuid
+import logging
 from math import ceil
 from trytond.model import Workflow, ModelView, ModelSQL, fields
 from trytond.pool import Pool
@@ -14,7 +15,9 @@ from trytond.transaction import Transaction
 from trytond.wizard import Button, StateTransition, StateView, Wizard
 from trytond.report import Report
 from trytond.pool import PoolMeta
-import logging
+from trytond.exceptions import UserError
+from trytond.i18n import gettext
+
 logger = logging.getLogger(__name__)
 
 __all__ = ['Sale', 'SaleLine', 'OtraCantidad', 'CalcularPapelWizard',
@@ -162,11 +165,7 @@ class Sale(metaclass=PoolMeta):
 
     @classmethod
     def __setup__(cls):
-        super(Sale, cls).__setup__()
-        cls._error_messages.update({
-                'miss_cantidad': 'Se debe setear la cantidad confirmada!',
-                'miss_otras_cantidades': 'Se debe agregar al menos una cantidad en "Otras cantidades"',
-                })
+        super().__setup__()
         cls._buttons.update({
                 'calcular_papel': {
                     'invisible': ~Eval('state').in_(['draft']),
@@ -199,14 +198,16 @@ class Sale(metaclass=PoolMeta):
     def quote(cls, sales):
         for sale in sales:
             if not sale.otra_cantidad:
-                cls.raise_user_error('miss_otras_cantidades')
+                raise UserError(gettext(
+                    'sale.msg_miss_otras_cantidades'))
 
-        return super(Sale, cls).quote(sales)
+        super().quote(sales)
 
     @classmethod
     @ModelView.button
     @Workflow.transition('confirmed')
     def confirm(cls, sales):
+        cls.write(sales, {'state': 'draft'})
         pool = Pool()
         SaleLine = pool.get('sale.line')
         OtraCantidad = pool.get('sale_printery_budget.otra_cantidad')
@@ -216,8 +217,9 @@ class Sale(metaclass=PoolMeta):
         CalcularPapelProducto = pool.get('sale_printery_budget.calcular_papel.producto')
         for sale in sales:
             if not sale.cantidad_confirmada:
-                cls.raise_user_error('miss_cantidad')
-            cantidad_vals = OtraCantidad.search_read([('id', '=', sale.cantidad_confirmada.id)], fields_names=['cantidad', 'utilidad'])[0]
+                raise UserError(gettext(
+                    'sale.msg_miss_cantidad'))
+            cantidad_vals, = OtraCantidad.search_read([('id', '=', sale.cantidad_confirmada.id)], fields_names=['cantidad', 'utilidad'])
             cantidad_confirmada = cantidad_vals['cantidad']
             utilidad = cantidad_vals['utilidad']
 
@@ -225,18 +227,17 @@ class Sale(metaclass=PoolMeta):
                     ('template.product_type_printery', '=', 'utilidad'),
                     ])
             # Agregar línea utilidad
-            sale_line = {
-                'sale': sale.id,
-                'sequence': 10,
-                'product': utilidad_producto.id,
-                'type': 'line',
-                'quantity': 1,
-                'unit': Uom.search_read([('id', '=', Id('product', 'uom_unit').pyson())],fields_names=['id'])[0]['id'],
-                'unit_price': Decimal(OtraCantidad._calcular_gastos(sale, cantidad_confirmada, lambda x: True) * utilidad / 100).quantize(Decimal('.01')),
-                'description': 'Utilidad (%d %%)' % utilidad,
-                'fijo': True,
-                }
-            SaleLine.create([sale_line])
+            sale_line = SaleLine()
+            sale_line.sale = sale
+            sale_line.sequence = 10
+            sale_line.product = utilidad_producto
+            sale_line.type = 'line'
+            sale_line.quantity = 1
+            sale_line.unit = Uom.search_read([('id', '=', Id('product', 'uom_unit').pyson())],fields_names=['id'])[0]['id']
+            sale_line.unit_price = Decimal(OtraCantidad._calcular_gastos(sale, cantidad_confirmada, lambda x: True) * utilidad / 100).quantize(Decimal('.01'))
+            sale_line.description = 'Utilidad (%d %%)' % utilidad
+            sale_line.fijo = True
+            sale_line.save()
 
         # Actualizamos las lineas
         escala = float(cantidad_confirmada) / sale.cantidad
@@ -244,7 +245,7 @@ class Sale(metaclass=PoolMeta):
         interiores_ids = set()
         for line in SaleLine.browse(line_ids):
             if line.type == 'line' and not line.fijo:
-                if line.unit_digits is 0:
+                if line.unit.digits == 0:
                     unit_digits = '0'
                 else:
                     unit_digits = '.01'
@@ -288,19 +289,20 @@ class Sale(metaclass=PoolMeta):
         productos_temporales = CalcularPapelProducto.search([('sale_id', '=', sale.id)])
         CalcularPapelProducto.delete(productos_temporales)
 
-        return super(Sale, cls).confirm(sales)
+        cls.write(sales, {'state': 'quotation'})
+        super(Sale, cls).confirm(sales)
 
 
 class PresupuestoClienteReport(Report):
     __name__ = 'sale_printery_budget.presupuesto_cliente'
 
     @classmethod
-    def get_context(cls, records, data):
+    def get_context(cls, records, header, data):
         pool = Pool()
         Date = pool.get('ir.date')
         User = pool.get('res.user')
         user = User(Transaction().user)
-        context = super(PresupuestoClienteReport, cls).get_context(records, data)
+        context = super(PresupuestoClienteReport, cls).get_context(records, header, data)
         context['company'] = user.company
         context['today'] = Date.today()
         return context
@@ -318,10 +320,8 @@ class SaleLine(metaclass=PoolMeta):
 class CalcularPapelProducto(ModelSQL, ModelView):
     "Wizard Producto"
     __name__ = 'sale_printery_budget.calcular_papel.producto'
-    name = fields.Char('Papel', size=None, translate=True,
-        select=True)
-    producto = fields.Many2One('product.product', 'Producto',
-        select=True)
+    name = fields.Char('Papel', size=None, translate=True)
+    producto = fields.Many2One('product.product', 'Producto')
     orientacion_papel = fields.Selection([
             ('H', 'Horizontal'),
             ('V', 'Vertical'),
@@ -369,9 +369,9 @@ class CalcularPapelWizard(ModelView):
         required=True)
     es_tapa = fields.Boolean('¿Es tapa?', states={
             'invisible': Eval('categoria').in_(['folleto']),
-            }, select=False,
+            },
         depends=['categoria'])
-    sin_pinza = fields.Boolean('Sin Pinza', select=False)
+    sin_pinza = fields.Boolean('Sin Pinza')
     id_wizard_start = fields.Char('id de wizard', states={'invisible': True})
     sale_id = fields.Integer('sale_id', states={'invisible': True})
     producto_id = fields.Integer('id de producto', states={'invisible': True})
@@ -460,10 +460,6 @@ class CalcularPapelWizard(ModelView):
     @classmethod
     def __setup__(cls):
         super(CalcularPapelWizard, cls).__setup__()
-        cls._error_messages.update({
-            'cantidad_paginas_multiplo_de_dos': 'Cantidad de paginas debe ser multiplo de 2',
-            'cantidad_paginas_multiplo_de_cuatro': 'Cantidad de paginas debe ser multiplo de 4',
-        })
 
     @fields.depends('maquina', 'altura', 'ancho', 'tipo_papel', 'gramaje', 'id_wizard_start', 'cantidad', 'calle_horizontal', 'calle_vertical', 'sin_pinza', 'categoria', 'solapa', 'lomo', 'es_tapa', 'sale_id', 'cantidad_paginas')
     def on_change_categoria(self):
@@ -628,9 +624,11 @@ class CalcularPapelWizard(ModelView):
         self.id_wizard_start = '0'
 
         if values.categoria == 'cuaderno' and values.cantidad_paginas % 2 != 0:
-            self.raise_user_error('cantidad_paginas_multiplo_de_dos')
+            raise UserError(gettext(
+                'sale.msg_cantidad_paginas_multiplo_de_dos'))
         if values.categoria == 'revista_libro' and values.cantidad_paginas % 4 != 0:
-            self.raise_user_error('cantidad_paginas_multiplo_de_cuatro')
+            raise UserError(gettext(
+                'sale.msg_cantidad_paginas_multiplo_de_cuatro'))
 
         if values.ancho and values.altura and values.gramaje and values.maquina and values.tipo_papel and values.cantidad:
             id_wizard = str(uuid.uuid1())

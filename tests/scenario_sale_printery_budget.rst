@@ -301,9 +301,11 @@ Wizard printery budget::
 
 Confirm cantidad and process sale::
 
+    >>> sale.click('draft')
     >>> OtraCantidad = Model.get('sale_printery_budget.otra_cantidad')
     >>> cantidad_confirmada = OtraCantidad.find([])[0]
     >>> sale.cantidad_confirmada = cantidad_confirmada
+    >>> sale.click('quote')
     >>> sale.click('confirm')
     >>> sale.state
     'processing'
@@ -315,7 +317,7 @@ Testing the report::
     >>> ext
     'odt'
     >>> name
-    'Presupuesto al Cliente'
+    'Presupuesto al Cliente-1'
 
 Process orden de trabajo::
 
@@ -337,4 +339,4 @@ Testing Orden Trabajo report::
     >>> ext
     'odt'
     >>> name
-    'Orden de trabajo'
+    'Orden de trabajo-Folleto 10x15'
